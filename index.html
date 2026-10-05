@@ -11,18 +11,15 @@
 <!-- 警告：本文件必须以 file:// 双击打开，禁止改为 type="module"，否则 CORS 报错（G2） -->
 </head>
 <body>
-<div class="app">
-  <aside class="app-side">
-    <div class="app-side__brand">学校工程手续辅助<small>前期 → 竣工验收</small></div>
-    <div class="app-side__group">
-      <ul class="app-nav">
-        <li class="app-nav__item is-active">项目管理</li>
-        <li class="app-nav__item">专属清单</li>
-      </ul>
-    </div>
-  </aside>
-  <header class="app-top"><span class="app-top__title">样式验证</span></header>
-  <main class="app-main"><div class="page"><p>三栏骨架已生效。</p></div></main>
-</div>
+  <div id="app"></div>
+  <!-- 顺序不可调整：core → views → main（main 必须最后） -->
+  <script src="js/core/ns.js"></script>
+  <script src="js/core/util.js"></script>
+  <script src="js/core/dom.js"></script>
+  <script src="js/core/store.js"></script>
+  <script src="js/core/idb.js"></script>
+  <script src="js/core/router.js"></script>
+  <script src="js/views/shell.js"></script>
+  <script src="js/main.js"></script>
 </body>
 </html>
