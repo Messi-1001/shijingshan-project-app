@@ -1,13 +1,13 @@
 /* js/views/shell.js —— 页面壳层：导航 + 顶栏 + 路由挂载 */
 (function (root, factory) {
-  var mod = factory();
+  var mod = factory(root);
   if (typeof module !== 'undefined' && module.exports) { module.exports = mod; }
   else {
     root.SJSQ = root.SJSQ || { core: {}, data: {}, logic: {}, views: {}, rawData: [] };
     root.SJSQ.views = root.SJSQ.views || {};
     root.SJSQ.views.shell = mod;
   }
-})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+})(typeof globalThis !== 'undefined' ? globalThis : this, function (root) {
   'use strict';
 
   // 导航分组：与 spec 第 6 节「页面结构」12 个页面一一对应
@@ -40,6 +40,10 @@
 
     var mainEl = dom.h('main', { class: 'app-main' });
 
+    // 降级提示独立容器：位于顶栏与 main 之间。router 的 render 只清 mainEl，
+    // 永不触碰此容器，保证黄条不会被首次渲染冲掉（修复 F1）。
+    var bannerZone = dom.h('div', { class: 'app-banner-zone' });
+
     var side = dom.h('aside', { class: 'app-side' }, [
       dom.h('div', { class: 'app-side__brand' }, [
         '学校工程手续辅助',
@@ -60,7 +64,7 @@
       dom.h('span', { class: 'app-top__title', text: '石景山区学校工程「前期手续 → 竣工验收」辅助系统' })
     ]);
 
-    var shellRoot = dom.h('div', { class: 'app' }, [side, top, mainEl]);
+    var shellRoot = dom.h('div', { class: 'app' }, [side, top, bannerZone, mainEl]);
 
     var r = router.createRouter({
       routes: opts.routes,
@@ -80,7 +84,7 @@
     });
 
     if (storeInfo.reason) {
-      mainEl.appendChild(dom.h('div', { class: 'app-banner' }, [
+      bannerZone.appendChild(dom.h('div', { class: 'app-banner' }, [
         '⚠ ', storeInfo.reason
       ]));
     }

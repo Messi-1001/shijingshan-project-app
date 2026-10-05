@@ -1,13 +1,13 @@
 /* js/core/router.js —— hash 路由 */
 (function (root, factory) {
-  var mod = factory();
+  var mod = factory(root);
   if (typeof module !== 'undefined' && module.exports) {
     module.exports = mod;
   } else {
     root.SJSQ = root.SJSQ || { core: {}, data: {}, logic: {}, views: {}, rawData: [] };
     root.SJSQ.core.router = mod;
   }
-})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+})(typeof globalThis !== 'undefined' ? globalThis : this, function (root) {
   'use strict';
 
   var PATH_KEYS = ['id', 'sub'];

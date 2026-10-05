@@ -2,8 +2,8 @@
 .app {
   display: grid;
   grid-template-columns: var(--sidebar-w) 1fr;
-  grid-template-rows: var(--topbar-h) 1fr;
-  grid-template-areas: "side top" "side main";
+  grid-template-rows: var(--topbar-h) auto 1fr;
+  grid-template-areas: "side top" "side banner" "side main";
   min-height: 100vh;
 }
 
@@ -51,6 +51,9 @@
 
 .app-main { grid-area: main; padding: var(--s-5); min-width: 0; }
 .app-main > .page { max-width: 1180px; }
+
+/* 降级提示区（Task 8 用）：独立于 main，render 清空 main 不影响黄条；无内容时高度为 0 */
+.app-banner-zone { grid-area: banner; }
 
 /* 降级提示条（Task 8 用） */
 .app-banner {
