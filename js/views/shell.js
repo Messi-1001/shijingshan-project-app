@@ -19,6 +19,7 @@
     { title: '查阅', items: [
       { key: 'library',   label: '全量手续库' },
       { key: 'templates', label: '模板库' },
+      { key: 'materials', label: '材料清单' },
       { key: 'platform',  label: '平台办事导航' }
     ]},
     { title: '筹划', items: [
