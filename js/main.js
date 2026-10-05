@@ -16,7 +16,8 @@
     'logic.renderTemplate',
     'views.ui', 'views.shell', 'views.v-projects', 'views.v-library', 'views.v-detail',
     'views.v-checklist', 'views.v-templates', 'views.v-templates-custom',
-    'logic.materials', 'views.v-materials'
+    'logic.materials', 'views.v-materials',
+    'logic.tender', 'views.v-tender'
   ];
 
   function checkModules() {
@@ -106,7 +107,8 @@
       detail:    function (params) { return S.views['v-detail'].render(params); },
       checklist: function (p) { return S.views['v-checklist'].render(p); },
       templates: function (p) { return S.views['v-templates'].render(p); },
-      materials: function (p) { return S.views['v-materials'].render(p); }
+      materials: function (p) { return S.views['v-materials'].render(p); },
+      tender:    function () { return S.views['v-tender'].render(); }
     };
 
     S.core.idb.createBestStore().then(function (store) {
