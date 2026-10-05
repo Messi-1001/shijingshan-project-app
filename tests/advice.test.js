@@ -75,3 +75,30 @@ test('rankAdvice 把 block 排到最前', () => {
   const l = a.rankAdvice([{ rule: 'start', level: 'info' }, { rule: 'blocked', level: 'block' }, { rule: 'deadline', level: 'warn' }]);
   assert.deepEqual(l.map((x) => x.level), ['block', 'warn', 'info']);
 });
+
+// —— risk 规则：只数专属命中（ALL 通用项不计入阈值），阈值 2 ——
+// 真实数据：lx-1 专属常见原因 2 条（r-007/r-008）；jg-5 仅 1 条（r-025）
+const RISK_INDEX = {
+  list: [
+    { id: 'lx-1', no: '1', name: '项目建议书', duration: 5, prev: [] },
+    { id: 'jg-5', no: '2', name: '竣工验收备案', duration: 5, prev: [] },
+  ],
+};
+RISK_INDEX.byId = RISK_INDEX.list.reduce((m, p) => { m[p.id] = p; return m; }, {});
+
+test('risk：专属命中 ≥2 条才提示，body 只列命中项', () => {
+  const list = a.buildAdvice({ index: RISK_INDEX, checklist: {}, scheduleInput: { mode: 'forward', startDate: '2026-10-01', targetEndDate: '2027-10-01' } });
+  const risk = list.find((x) => x.rule === 'risk');
+  assert.ok(risk, 'lx-1 有 2 条专属常见原因，应产出 risk');
+  assert.equal(risk.level, 'warn');
+  assert.ok(risk.body.includes('项目建议书'));
+  assert.ok(!risk.body.includes('竣工验收备案'), 'jg-5 仅 1 条专属，不应被点名');
+});
+
+test('risk：阈值常量为 2 且 ALL 通用原因不计数', () => {
+  assert.equal(a.RISK_HIT_THRESHOLD, 2);
+  // 全部做完时不产出 risk
+  const done = RISK_INDEX.list.reduce((m, p) => { m[p.id] = { status: 'done' }; return m; }, {});
+  const list = a.buildAdvice({ index: RISK_INDEX, checklist: done, scheduleInput: { mode: 'forward', startDate: '2026-10-01', targetEndDate: '2027-10-01' } });
+  assert.equal(list.filter((x) => x.rule === 'risk').length, 0);
+});

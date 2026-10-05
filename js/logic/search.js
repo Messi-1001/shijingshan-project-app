@@ -41,6 +41,8 @@
 
   // 四类数据合成统一检索项：{ kind, id, title, subtitle, text, hash }，
   // 并预计算归一化字段 _nTitle/_nSub/_nText（O(n) 一次，检索时只做 indexOf）
+  // hash 格式与 core/router.js 的 buildHash 同构（id 走路径段，focus 走查询串），
+  // 保证每个结果都能被 router.parseHash 正确解析——tests/search.test.js 有同构断言。
   function buildSearchIndex(data) {
     var d = data || defaultData();
     var out = [];
@@ -52,7 +54,7 @@
         title: p.no + '. ' + p.name,
         subtitle: p.dept || '',
         text: [p.name, p.dept, p.remark, p.note, p.notes, p.basis].filter(Boolean).join(' '),
-        hash: '#/detail?id=' + encodeURIComponent(p.id),
+        hash: '#/detail/' + encodeURIComponent(p.id),
       });
     });
 
@@ -89,7 +91,7 @@
         title: p.name,
         subtitle: p.short + ' · ' + (p.scope || ''),
         text: [p.name, p.short, p.scope, p.account, stepText].filter(Boolean).join(' '),
-        hash: '#/platform?id=' + encodeURIComponent(p.id),
+        hash: '#/platform/' + encodeURIComponent(p.id),
       });
     });
 

@@ -68,3 +68,23 @@ test('limit 生效', () => {
   assert.ok(r.hits.length <= 1);
   assert.equal(r.total >= 1, true);
 });
+
+// —— hash 与 core/router.js 的 buildHash 同构（id 走路径段，focus 走查询串）——
+test('索引 hash 与 router.buildHash 产物一致，且可被 parseHash 还原', () => {
+  const router = require('../js/core/router.js');
+  const idx = s.buildSearchIndex(DATA);
+  const expected = {
+    procedure: router.buildHash('detail', { id: DATA.proceduresIndex.list[0].id }),
+    template: router.buildHash('templates', { focus: DATA.templatesIndex.list[0].id }),
+    reason: router.buildHash('reasons', { focus: DATA.rejectReasons.REASONS[0].id }),
+    platform: router.buildHash('platform', { id: DATA.platforms.PLATFORMS[0].id }),
+  };
+  Object.keys(expected).forEach(function (kind) {
+    const hit = idx.find((x) => x.kind === kind);
+    assert.equal(hit.hash, expected[kind], kind + ' 的 hash 与 buildHash 不一致');
+    const parsed = router.parseHash(hit.hash);
+    assert.ok(parsed.name, kind + ' 的 hash 解析不出路由名');
+    if (kind === 'procedure' || kind === 'platform') assert.equal(parsed.params.id, DATA[kind === 'procedure' ? 'proceduresIndex' : 'platforms'][kind === 'procedure' ? 'list' : 'PLATFORMS'][0].id);
+    else assert.equal(parsed.params.focus, DATA[kind === 'template' ? 'templatesIndex' : 'rejectReasons'][kind === 'template' ? 'list' : 'REASONS'][0].id);
+  });
+});

@@ -2,17 +2,17 @@
    按紧要程度排序，永不为空。纯函数，不碰 DOM 与存储。 */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) {
-    module.exports = factory(require('./progress.js'), require('./schedule.js'), require('../data/reject-reasons.js'));
+    module.exports = factory(require('./schedule.js'), require('../data/reject-reasons.js'));
   } else {
     root.SJSQ = root.SJSQ || {}; root.SJSQ.logic = root.SJSQ.logic || {};
-    root.SJSQ.logic.advice = factory(root.SJSQ.logic.progress, root.SJSQ.logic.schedule, root.SJSQ.data.rejectReasons);
+    root.SJSQ.logic.advice = factory(root.SJSQ.logic.schedule, root.SJSQ.data.rejectReasons);
   }
-})(typeof self !== 'undefined' ? self : this, function (progress, schedule, rejectReasons) {
+})(typeof self !== 'undefined' ? self : this, function (schedule, rejectReasons) {
   'use strict';
 
   var RULE_ORDER = ['blocked', 'next', 'deadline', 'risk', 'estimate', 'reserved', 'start'];
   var LEVEL_WEIGHT = { block: 0, warn: 1, info: 2 };
-  var RISK_HIT_THRESHOLD = 3;
+  var RISK_HIT_THRESHOLD = 2;
 
   // 与 core/router.js 的 buildHash 同构（id 走路径段，其余键走查询串），
   // 保证 refs 里的 hash 一定能被 router.parseHash 解析——不手写字符串。
@@ -109,11 +109,13 @@
       } catch (err) { /* 数据异常时静默跳过，不阻塞其他建议 */ }
     }
 
-    // 4) risk —— 未完成项中命中"常见退回原因"≥3 条的项
+    // 4) risk —— 未完成项中专属命中"常见退回原因"≥2 条的项。
+    //    只数专属命中（appliesTo 指到该手续 id），不数 ALL 通用项——
+    //    否则每项都天然 ≥6 条，阈值恒真，提示信息量为零。
     var risky = [];
     list.forEach(function (p) {
       if (statusOf(checklist, p.id) === 'done') return;
-      var hits = rejectReasons.highFrequencyFor(p.id);
+      var hits = rejectReasons.highFrequencyFor(p.id).filter(function (x) { return x.appliesTo !== 'ALL'; });
       if (hits.length >= RISK_HIT_THRESHOLD) risky.push({ p: p, hits: hits });
     });
     if (risky.length) {
@@ -146,7 +148,7 @@
         rule: 'reserved', level: 'info',
         title: '有 ' + reserved.length + ' 项为预留手续',
         body: '预留项（' + reserved.map(function (p) { return p.no + '. ' + p.name; }).join('、') +
-          '）本期不产生实际办理动作，但保留在清单里以覆盖极端情形。它们不计入进度完成率的分母。',
+          '）本期不产生实际办理动作，但保留在清单里以覆盖极端情形。预留项亦计入清单展示与进度统计。',
         refs: [],
       });
     }
