@@ -6,7 +6,7 @@
   var REQUIRED = [
     'core.ns', 'core.util', 'core.dom', 'core.store', 'core.idb', 'core.router',
     'core.state', 'data.schema', 'data.index', 'data.guidance', 'logic.graph',
-    'views.ui', 'views.shell', 'views.v-projects', 'views.v-library'
+    'views.ui', 'views.shell', 'views.v-projects', 'views.v-library', 'views.v-detail'
   ];
 
   function checkModules() {
@@ -86,7 +86,7 @@
     var routes = {
       projects:  function () { return S.views['v-projects'].render(); },
       library:   function () { return S.views['v-library'].render(); },
-      detail:    TODO('手续详情'),
+      detail:    function (params) { return S.views['v-detail'].render(params); },
       checklist: TODO('我的项目专属清单'),
       templates: TODO('模板库')
     };

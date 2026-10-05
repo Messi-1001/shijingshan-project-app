@@ -80,3 +80,7 @@
   border-radius: var(--r-md); background: var(--c-surface);
 }
 .lib-search:focus { border-color: var(--c-primary); }
+
+/* 页面 4：手续详情（Task 22） */
+.breadcrumb { font-size: var(--f-sm); margin-bottom: var(--s-2); }
+.breadcrumb a { color: var(--c-text-sub); }
