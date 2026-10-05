@@ -11,7 +11,7 @@
     {
       id: 'scheme-a',
       name: '方案 A · 集中式布局',
-      image: 'assets/scheme-a.png',
+      image: 'assets/scheme-a.jpg',
       concept: '以一座主体教学楼为核心，教学、办公、食堂等功能竖向叠合，释放出一片完整的集中活动场地。',
       features: [
         '主体教学楼集中布置于场地中央，层数较高、占地较小',
@@ -26,7 +26,7 @@
     {
       id: 'scheme-b',
       name: '方案 B · 院落式布局',
-      image: 'assets/scheme-b.png',
+      image: 'assets/scheme-b.jpg',
       concept: '以两到三个围合院落组织教学组团，尺度更接近传统校园，室外空间层次丰富，便于分年级管理。',
       features: [
         '教学组团沿南北向分列，中间形成内院',

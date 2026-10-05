@@ -1,6 +1,8 @@
 /* tests/schemes.test.js —— 方案与效果图页（Task 63）：数据层 + buildCards 纯函数 */
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
 global.document = { createElement: () => ({ style: {}, classList: { add() {} }, appendChild() {}, setAttribute() {} }) };
 global.window = global;
 const s = require('../js/data/schemes.js');
@@ -23,6 +25,14 @@ test('每版方案字段齐全', () => {
 
 test('图片路径都在 assets 下', () => {
   s.SCHEMES.forEach((x) => assert.match(x.image, /^assets\//));
+});
+
+test('效果图文件真实存在且非空（Task 64 静态自检）', () => {
+  s.SCHEMES.forEach((x) => {
+    const p = path.join(__dirname, '..', x.image);
+    assert.ok(fs.existsSync(p), x.image + ' 不存在');
+    assert.ok(fs.statSync(p).size > 10 * 1024, x.image + ' 体积过小，疑似占位文件');
+  });
 });
 
 test('validateSchemes 对良好数据返回空', () => {
