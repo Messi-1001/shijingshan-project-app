@@ -75,7 +75,7 @@
     var ui = root.SJSQ.views.ui;
     var form = dom.h('form', { class: 'form-grid' }, [
       ui.field({ label: '文件名（含扩展名）', name: 'fileName', placeholder: '如：施工招标文件（空白）.pdf' }),
-      ui.field({ label: '存放目录（可留空）', name: 'dir', placeholder: '如：文件模板/招标与合同' }),
+      ui.field({ label: '存放目录（可留空）', name: 'dir', placeholder: '如：../文件模板/招标与合同' }),
       ui.field({ label: '分类', name: 'category', type: 'select', options: ALLOWED }),
       ui.field({ label: '类型', name: 'type', type: 'select', options: ['可复用', '参考'] }),
       ui.field({ label: '关联手续 id（逗号分隔）', name: 'procedureIds', placeholder: '如：zb-5 或 zb-2,zb-3' }),
