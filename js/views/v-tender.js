@@ -10,15 +10,37 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function (root) {
   'use strict';
 
+  // 纯函数（Node 可测）：招标参数默认值
+  function defaultInput() {
+    return { startDate: '', urgency: '正常', complexity: '中',
+      techComplexity: false, hasSpecialRequirements: false };
+  }
+
+  // 纯函数（Node 可测）：将 meta 表读回的记录合并到默认值上，
+  // 字段缺失 / 取值非法时回退默认，保证刷新恢复不产生脏状态（G22）。
+  function mergeInput(saved) {
+    var d = defaultInput();
+    var s = saved && typeof saved === 'object' ? saved : {};
+    return {
+      startDate: typeof s.startDate === 'string' && s.startDate ? s.startDate : d.startDate,
+      urgency: ['宽松', '正常', '紧张'].indexOf(s.urgency) >= 0 ? s.urgency : d.urgency,
+      complexity: ['低', '中', '高'].indexOf(s.complexity) >= 0 ? s.complexity : d.complexity,
+      techComplexity: s.techComplexity === true,
+      hasSpecialRequirements: s.hasSpecialRequirements === true,
+    };
+  }
+
   function render() {
     var dom = root.SJSQ.core.dom;
     var ui = root.SJSQ.views.ui;
     var tender = root.SJSQ.logic.tender;
     var util = root.SJSQ.core.util;
     var router = root.SJSQ.core.router;
+    var store = root.SJSQ.app && root.SJSQ.app.store;
+    var META_ID = 'tenderInput'; // G22：单例设置统一存 meta 表（同 v-schedule / v-estimate）
 
-    var state = { startDate: util.formatDate(new Date()), urgency: '正常', complexity: '中',
-      techComplexity: false, hasSpecialRequirements: false };
+    var state = mergeInput(null);
+    if (!state.startDate) { state.startDate = util.formatDate(new Date()); }
 
     var page = dom.h('div', { class: 'page' }, [
       dom.h('div', { class: 'page__head' }, [
@@ -50,6 +72,16 @@
       state.complexity = g('complexity');
       state.techComplexity = g('techComplexity') === 'true';
       state.hasSpecialRequirements = g('hasSpecialRequirements') === 'true';
+    }
+
+    // meta 恢复后把读回值同步回表单控件，再重绘结果区
+    function applyToForm() {
+      var set = function (n, v) { var el = form.querySelector('[name="' + n + '"]'); if (el) el.value = v; };
+      set('startDate', state.startDate);
+      set('urgency', state.urgency);
+      set('complexity', state.complexity);
+      set('techComplexity', String(state.techComplexity));
+      set('hasSpecialRequirements', String(state.hasSpecialRequirements));
     }
 
     function paint() {
@@ -95,15 +127,35 @@
     page.appendChild(timelineSlot);
     page.appendChild(adviceSlot);
 
-    form.addEventListener('change', function () { readForm(); paint(); });
+    // 表单变化即重算，并持久化到 meta 表（G22：刷新后可恢复）
+    form.addEventListener('change', function () {
+      readForm();
+      if (store) {
+        try { store.put('meta', { id: META_ID, value: state }); } catch (e) { /* 存储失败不打断页面 */ }
+      }
+      paint();
+    });
 
     page.appendChild(dom.h('div', { class: 'page__actions' }, [
       ui.button('打印计划', { onClick: function () { window.print(); } })
     ]));
 
     paint();
+
+    // 首次进入时从 meta 表恢复上次的招标参数（G22）
+    if (store) {
+      Promise.resolve(store.get('meta', META_ID)).then(function (row) {
+        if (row && row.value) {
+          state = mergeInput(row.value);
+          if (!state.startDate) { state.startDate = util.formatDate(new Date()); }
+          applyToForm();
+          paint();
+        }
+      }).catch(function () { /* 读取失败保持默认值，不打断页面 */ });
+    }
+
     return page;
   }
 
-  return { render: render };
+  return { defaultInput: defaultInput, mergeInput: mergeInput, render: render };
 });
