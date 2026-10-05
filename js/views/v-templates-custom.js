@@ -23,8 +23,12 @@
     var v = values || {};
     if (!v.fileName || !String(v.fileName).trim()) return null;
     var category = ALLOWED.indexOf(v.category) >= 0 ? v.category : '其他';
+    // id 必须全局唯一：seq 每次刷新页面会归零，且 \W 会把中文文件名剥得只剩扩展名，
+    // 二者叠加会让不同自定义模板撞 id、被 mergeCustom 去重丢失（阶段四验收实测发现），
+    // 故加 Date.now 后缀并保留中文（\u4e00-\u9fa5）参与派生。
     return {
-      id: 'tpl-custom-' + seq() + '-' + String(v.fileName).replace(/\W/g, '').slice(0, 12),
+      id: 'tpl-custom-' + seq() + '-' + Date.now().toString(36) + '-' +
+        String(v.fileName).replace(/[^\w\u4e00-\u9fa5]/g, '').slice(0, 12),
       fileName: String(v.fileName).trim(),
       dir: v.dir || '(自定义)',
       category: category,

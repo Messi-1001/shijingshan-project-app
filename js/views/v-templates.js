@@ -91,7 +91,12 @@
                     title: t.editable ? '' : '该模板为扫描件，请下载后手工填写',
                     onClick: function () { root.SJSQ.logic.renderTemplate.copyToClipboard(t, ui); }
                   }),
-                  ui.button('打开文件', { onClick: function () { window.open(encodeURI(t.dir + '/' + t.fileName), '_blank'); } }),
+                  // 自定义模板无实体文件（仅存在索引里），打开只会 404，置灰并说明
+                  ui.button('打开文件', {
+                    disabled: !!t.custom,
+                    title: t.custom ? '自定义模板仅可复制/导出（无实体文件可打开）' : '',
+                    onClick: function () { window.open(encodeURI(t.dir + '/' + t.fileName), '_blank'); }
+                  }),
                   ui.button('导出 Word', {
                     disabled: !t.editable,
                     onClick: function () {

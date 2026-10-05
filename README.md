@@ -42,3 +42,13 @@ cd "D:/4workbuddy工作空间/2毕业设计/3代码实施"
 - [x] 各板块完成率看板随状态变化（`buildBoard` 纯函数测试 tone idle/doing/done 三态 + 页面 `.board` 渲染核对）
 - [x] 控制台调用 buildSafetyNet 传"装修改造"时，unhandled 含 sg-1 且原因含"城市更新"（静态自检：`safetynet.test.js` 断言 `unhandled[0].procedureId === 'sg-1'` 且 reason 含「城市更新」）
 - 核对方式：`tests/integration-phase3.test.js`（6 例：条件值零缺失、G8 恒等 40 项、37 有效手续、完成率线性、① 立项前置联动、脏状态归 idle）+ 无头浏览器脚本（verify-phase3.js，截图见 `docs/verify-5-专属清单.png`）
+
+## 阶段四验收记录（2026-10-05）
+- [x] 模板索引 35 条、零错误、挂靠手续全部存在；分类 2/6/6/2/19（`tests/integration-phase4.test.js` + `templates.test.js`）
+- [x] 扫描件条目「复制内容 / 复制待填字段」置灰，悬停提示「请下载后手工填写」（无头浏览器核对 jg-1 详情：3 个扫描件按钮 disabled）
+- [x] 详情页 ⑥ 关联模板：有挂接的手续出现模板卡片（可复用/参考标签），无挂接的显示空态（数据如此，不编造模板正文）
+- [x] 模板库可搜索（「请示」命中 2 条）、可复制（alert + 剪贴板含 `{{项目名称}}：＿＿＿＿` 占位）、可导 Word（`exporters.buildDocHtml` 已有 Node 测试）
+- [x] 材料清单页概览数字相符（75 条 → 合并 69 条、142 份、37 项手续），警告区显示「⚠ 4 处材料信息不全」，按提供方分组 7 组每组非空
+- [x] 自定义模板：新增入库、刷新后仍在（IndexedDB meta 表）；「打开文件」按钮置灰并提示「自定义模板仅可复制/导出（无实体文件可打开）」
+- [x] 附带修复：自定义模板 id 派生用 `\W` 会把中文文件名剥得只剩扩展名、叠加 seq 刷新归零，导致不同模板撞 id 被 mergeCustom 丢弃；已改为保留中文并加 Date.now 后缀（含回归测试）
+- 核对方式：`tests/integration-phase4.test.js`（10 例）+ 无头浏览器脚本（verify-phase4.js，22/22 通过，截图见 `docs/verify-6-模板库.png`、`docs/verify-7-材料清单.png`）
