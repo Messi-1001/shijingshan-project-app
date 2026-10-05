@@ -90,6 +90,8 @@
     }
 
     shellRoot.__router = r;
+    // 供 boot 在壳层挂载后往 banner 区追加持久化错误条（校验失败提示），router 不触碰此区
+    shellRoot.__bannerZone = bannerZone;
     return shellRoot;
   }
 

@@ -2,6 +2,12 @@
 (function () {
   'use strict';
 
+  // Node 测试环境：不执行 boot，只导出可测的错误条挂载函数
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { mountValidationErrorBar: mountValidationErrorBar };
+    return;
+  }
+
   var S = window.SJSQ;
   var REQUIRED = [
     'core.ns', 'core.util', 'core.dom', 'core.store', 'core.idb', 'core.router',
@@ -39,7 +45,8 @@
   }
 
   // 数据注册：rawData（七个 procedures-*.js 在加载时压入）→ buildIndex → 挂 S.app.procedures。
-  // 若校验有错，页面顶部显示红色错误条并在控制台打出全部错误（自检可见，不静默）。
+  // 若校验有错，控制台打出全部错误（自检可见，不静默）；红条本身延迟到壳层挂载后渲染
+  // （见 mountValidationErrorBar），避免被 boot 清空 #app 的时机抹掉。
   function registerProcedures() {
     var idx = S.data.index;
     var out = idx.buildIndex(S.rawData || []);
@@ -50,19 +57,31 @@
     };
     if (out.errors.length) {
       console.error('手续数据校验不通过：\n' + out.errors.join('\n'));
-      var app = document.getElementById('app');
-      var bar = document.createElement('div');
-      bar.className = 'app-banner';
-      bar.style.background = 'var(--c-danger-bg)';
-      bar.style.borderColor = 'var(--c-danger-border)';
-      bar.style.color = 'var(--c-danger)';
-      bar.textContent = '⚠ 手续数据校验不通过，共 ' + out.errors.length + ' 处，详见控制台（Console）';
-      app.insertBefore(bar, app.firstChild);
     }
     return out;
   }
 
-  // 阶段三、四才实现的页面的占位路由（checklist / templates / library / detail 视图文件尚未存在）
+  // 校验失败红条：挂进壳层的 banner 区（topbar 与 main 之间）。该区在 router 的
+  // mount（mainEl）之外，任何 render / 清屏都不会把它带走（终审 #1 修复）。
+  // 之所以不在 registerProcedures 里立即插 #app：随后 rootEl.innerHTML='' 会把它清掉。
+  function mountValidationErrorBar(shellEl, errors) {
+    if (!shellEl || !(errors || []).length) return null;
+    var bar = document.createElement('div');
+    bar.className = 'app-banner';
+    bar.style.background = 'var(--c-danger-bg)';
+    bar.style.borderColor = 'var(--c-danger-border)';
+    bar.style.color = 'var(--c-danger)';
+    bar.textContent = '⚠ 手续数据校验不通过，共 ' + errors.length + ' 处，详见控制台（Console）';
+    var zone = shellEl.__bannerZone;
+    if (zone) {
+      zone.appendChild(bar);
+    } else {
+      shellEl.insertBefore(bar, shellEl.firstChild);
+    }
+    return bar;
+  }
+
+  // 阶段三、四才实现的页面的占位路由（checklist / templates 属阶段三、四；library / detail 已接线）
   function TODO(label) {
     return function () {
       return S.core.dom.h('div', { class: 'page' }, [
@@ -114,6 +133,9 @@
       var rootEl = document.getElementById('app');
       rootEl.innerHTML = '';
       rootEl.appendChild(shell);
+
+      // 校验红条必须在清屏之后挂进 banner 区，才能持续可见（终审 #1）
+      mountValidationErrorBar(shell, S.app.procedures && S.app.procedures.errors);
       var r = shell.__router;
 
       // 顺序关键：必须先把运行时单例挂到 S.app，再 r.start()。
