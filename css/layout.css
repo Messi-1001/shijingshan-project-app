@@ -72,3 +72,11 @@
 .form-grid .ui-field:nth-child(1),
 .form-grid .ui-field:nth-child(2) { grid-column: span 1; }
 .form-errors { margin-bottom: var(--s-3); }
+
+/* 页面 3：全量手续库（Task 21） */
+.lib-search {
+  flex: 1 1 auto; min-width: 320px; max-width: 560px;
+  padding: var(--s-2) var(--s-3); border: 1px solid var(--c-border-strong);
+  border-radius: var(--r-md); background: var(--c-surface);
+}
+.lib-search:focus { border-color: var(--c-primary); }
