@@ -10,7 +10,7 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function (root) {
   'use strict';
 
-  // 导航分组：与 spec 第 6 节「页面结构」12 个页面一一对应
+  // 导航分组：与 spec 第 6 节「页面结构」11 个页面一一对应
   var NAV_GROUPS = [
     { title: '办理', items: [
       { key: 'projects',  label: '项目管理' },

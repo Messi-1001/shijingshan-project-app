@@ -13,7 +13,7 @@
 </head>
 <body>
   <div id="app"></div>
-  <!-- 顺序不可调整：core → views → main（main 必须最后） -->
+  <!-- 顺序不可调整：core → data → logic → views → main（main 必须最后） -->
   <script src="js/core/ns.js"></script>
   <script src="js/core/util.js"></script>
   <script src="js/core/dom.js"></script>
@@ -21,9 +21,24 @@
   <script src="js/core/store.js"></script>
   <script src="js/core/idb.js"></script>
   <script src="js/core/router.js"></script>
-  <script src="js/views/shell.js"></script>
+
+  <script src="js/data/schema.js"></script>
+  <script src="js/data/procedures-01-lixiang.js"></script>
+  <script src="js/data/procedures-02-yongdi.js"></script>
+  <script src="js/data/procedures-03-guihua.js"></script>
+  <script src="js/data/procedures-04-pingjia.js"></script>
+  <script src="js/data/procedures-05-zhaobiao.js"></script>
+  <script src="js/data/procedures-06-shigong.js"></script>
+  <script src="js/data/procedures-07-jungong.js"></script>
+  <script src="js/data/procedures-index.js"></script>
+  <script src="js/data/guidance.js"></script>
+
+  <script src="js/logic/graph.js"></script>
+
   <script src="js/views/ui.js"></script>
+  <script src="js/views/shell.js"></script>
   <script src="js/views/v-projects.js"></script>
+
   <script src="js/main.js"></script>
 </body>
 </html>

@@ -5,7 +5,8 @@
   var S = window.SJSQ;
   var REQUIRED = [
     'core.ns', 'core.util', 'core.dom', 'core.store', 'core.idb', 'core.router',
-    'core.state', 'views.ui', 'views.shell', 'views.v-projects'
+    'core.state', 'data.schema', 'data.index', 'data.guidance', 'logic.graph',
+    'views.ui', 'views.shell', 'views.v-projects'
   ];
 
   function checkModules() {
@@ -37,17 +38,58 @@
     return max;
   }
 
+  // 数据注册：rawData（七个 procedures-*.js 在加载时压入）→ buildIndex → 挂 S.app.procedures。
+  // 若校验有错，页面顶部显示红色错误条并在控制台打出全部错误（自检可见，不静默）。
+  function registerProcedures() {
+    var idx = S.data.index;
+    var out = idx.buildIndex(S.rawData || []);
+    S.app = S.app || {};
+    S.app.procedures = {
+      list: out.list, byId: out.byId, bySection: out.bySection,
+      counts: idx.getCounts(), errors: out.errors
+    };
+    if (out.errors.length) {
+      console.error('手续数据校验不通过：\n' + out.errors.join('\n'));
+      var app = document.getElementById('app');
+      var bar = document.createElement('div');
+      bar.className = 'app-banner';
+      bar.style.background = 'var(--c-danger-bg)';
+      bar.style.borderColor = 'var(--c-danger-border)';
+      bar.style.color = 'var(--c-danger)';
+      bar.textContent = '⚠ 手续数据校验不通过，共 ' + out.errors.length + ' 处，详见控制台（Console）';
+      app.insertBefore(bar, app.firstChild);
+    }
+    return out;
+  }
+
+  // 阶段三、四才实现的页面的占位路由（checklist / templates / library / detail 视图文件尚未存在）
+  function TODO(label) {
+    return function () {
+      return S.core.dom.h('div', { class: 'page' }, [
+        S.core.dom.h('h1', { text: label }),
+        S.views.ui.empty('本页面将在后续阶段实现', '')
+      ]);
+    };
+  }
+
   function boot() {
     if (!checkModules()) return;
-
-    var routes = {
-      projects: function () { return S.views['v-projects'].render(); }
-    };
 
     // 应用状态单例：boot 前段挂好，后面 createBestStore 的回调里只做属性赋值补挂
     // store/router（G23：禁止整体替换 S.app，否则 state 会被弄丢）。
     S.app = S.app || {};
     S.app.state = S.core.state.createState();
+
+    // 数据注册必须在路由启动之前完成（视图会读 SJSQ.app.procedures）
+    registerProcedures();
+
+    var routes = {
+      projects:  function () { return S.views['v-projects'].render(); },
+      library:   TODO('全量手续库'),
+      detail:    TODO('手续详情'),
+      checklist: TODO('我的项目专属清单'),
+      templates: TODO('模板库')
+    };
 
     S.core.idb.createBestStore().then(function (store) {
       // 先扫存量 id 回置 uid 计数器，再进壳层——保证首个新建项目的 uid 不与旧数据撞
