@@ -65,3 +65,10 @@
 
 .page__head { margin-bottom: var(--s-4); }
 .page__head p { color: var(--c-text-sub); margin: 0; }
+
+/* 页面 1：项目管理（Task 10） */
+.page__actions { display: flex; gap: var(--s-2); margin-bottom: var(--s-4); }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 var(--s-3); }
+.form-grid .ui-field:nth-child(1),
+.form-grid .ui-field:nth-child(2) { grid-column: span 1; }
+.form-errors { margin-bottom: var(--s-3); }

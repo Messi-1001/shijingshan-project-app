@@ -26,12 +26,13 @@
     if (!checkModules()) return;
 
     var routes = {
-      // 阶段一 Task 10 会替换为 S.views['v-projects'].render()；
-      // v-projects.js 尚未创建，此处先用占位视图，避免启动报错（brief Step 8 备注）
-      projects: function () {
-        return S.core.dom.h('div', { class: 'page', text: '项目管理（待 Task 10 实现）' });
-      }
+      projects: function () { return S.views['v-projects'].render(); }
     };
+
+    // 应用状态单例：boot 前段挂好，后面 createBestStore 的回调里只做属性赋值补挂
+    // store/router（G23：禁止整体替换 S.app，否则 state 会被弄丢）。
+    S.app = S.app || {};
+    S.app.state = S.core.state.createState();
 
     S.core.idb.createBestStore().then(function (store) {
       var shell = S.views.shell.createShell({
