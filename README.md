@@ -52,3 +52,9 @@ cd "D:/4workbuddy工作空间/2毕业设计/3代码实施"
 - [x] 自定义模板：新增入库、刷新后仍在（IndexedDB meta 表）；「打开文件」按钮置灰并提示「自定义模板仅可复制/导出（无实体文件可打开）」
 - [x] 附带修复：自定义模板 id 派生用 `\W` 会把中文文件名剥得只剩扩展名、叠加 seq 刷新归零，导致不同模板撞 id 被 mergeCustom 丢弃；已改为保留中文并加 Date.now 后缀（含回归测试）
 - 核对方式：`tests/integration-phase4.test.js`（10 例）+ 无头浏览器脚本（verify-phase4.js，22/22 通过，截图见 `docs/verify-6-模板库.png`、`docs/verify-7-材料清单.png`）
+
+## 阶段七验收记录（2026-10-05）
+- [x] spec v1.3 第 10 章 **9 条验收标准逐条核对完成**，判定与证据见 `docs/验收记录.md`（8 条 PASS / 第 9 条部分达标：行数与工期已实测，积分需用户查账单；无 FAIL 项）
+- [x] 体积预算护栏 `tests/budget.test.js`（9 断言）：JS 342.5KB≤700 / 单文件≤160 / CSS 25.5KB≤90 / index.html 3.7KB≤40 / 代码合计 371.6KB≤900 / 效果图各≤1.5MB（实测 0.30/0.25MB） / 资源总计 0.91MB≤4.5 / 引用完整性 / 无 CDN 外链
+- [x] 性能护栏 `tests/perf.test.js`（Node 冒烟）+ `scripts/perf-measure.js`（无头浏览器实测）：首屏 129ms≤300、专属清单 40 行首渲染 61ms≤300、全量搜索均值 0.3ms≤200、页面零报错（结果见 `docs/perf-check/perf-results.json`）
+- 附带清理：advice.js risk 规则只数专属命中（阈值降为 2，消除恒真提示）、预留项文案与 progress.summarize 实际口径对齐、search.js hash 与 router.buildHash 同构（含断言）、平台菜单文案、advice.js 死参数
