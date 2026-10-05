@@ -96,3 +96,8 @@
 .cl-status { padding: 2px var(--s-1); border: 1px solid var(--c-border-strong); border-radius: var(--r-sm); }
 .cl-note { width: 100%; min-width: 140px; padding: 2px var(--s-1); border: 1px solid var(--c-border); border-radius: var(--r-sm); }
 .cl-blocked { font-size: var(--f-xs); color: var(--c-warn); }
+
+/* 清单页安全网：裁剪结果可展开（Task 29） */
+.cl-dropped { margin: var(--s-4) 0; padding: var(--s-3); background: var(--c-warn-bg);
+  border: 1px solid var(--c-warn-border); border-radius: var(--r-md); color: var(--c-warn); font-size: var(--f-sm); }
+.cl-dropped summary { cursor: pointer; }

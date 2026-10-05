@@ -79,6 +79,33 @@
     return out;
   }
 
+  /** 安全网：统计裁剪结果，并把"本期未覆盖"的组合单独列出来（spec 5.5 第三重防护） */
+  function buildSafetyNet(list, projectValues, condMap) {
+    var flt = L('filter');
+    var r = flt ? flt.filterProcedures(list, projectValues, condMap) : { kept: list || [], dropped: [] };
+
+    var unhandled = [];
+    // ⑤ 施工许可：装修改造走城市更新路，本期不做
+    if ((projectValues || {}).buildNature === '装修改造') {
+      var sg = (list || []).find(function (p) { return p.id === 'sg-1'; });
+      if (sg) {
+        unhandled.push({
+          procedureId: 'sg-1', procedureName: sg.name,
+          reason: '建设性质 = 装修改造 走"城市更新"路径（城市更新号 → 风险等级 → 超危大数量 → 工程性质 → 单体信息 → 工程编码），本期未覆盖'
+        });
+      }
+    }
+
+    var warning = r.dropped.length
+      ? '已按项目四维取值裁掉 ' + r.dropped.length + ' 项手续，可展开查看原因；全量手续库始终可对照。'
+      : '';
+
+    return {
+      keptCount: r.kept.length, droppedCount: r.dropped.length,
+      dropped: r.dropped, unhandled: unhandled, warning: warning
+    };
+  }
+
   function render(params) {
     var dom = root.SJSQ.core.dom;
     var ui = root.SJSQ.views.ui;
@@ -186,6 +213,28 @@
             .map(function (r) { return [String(r.no), r.name, r.why.join('；')]; }))
         ]));
 
+        // 🔒 安全网 3：裁剪结果可展开 + 本期未覆盖显式提示
+        var net = buildSafetyNet(list, conditions.FIXED_VALUES, null);
+
+        if (net.warning) {
+          var details = dom.h('details', { class: 'cl-dropped' }, [
+            dom.h('summary', { text: net.warning }),
+            dom.h('ul', {}, net.dropped.map(function (d) {
+              return dom.h('li', { text: '第 ' + (app.procedures.byId[d.id] || {}).no + ' 项 ' +
+                d.name + ' —— 未命中：' + d.miss.join('、') });
+            }))
+          ]);
+          bodySlot.appendChild(details);
+        }
+
+        if (net.unhandled.length) {
+          bodySlot.appendChild(ui.section('⛔ 本期未覆盖（显式提示，非静默隐藏）', [
+            ui.table(['手续', '原因'], net.unhandled.map(function (u) {
+              return [u.procedureName, u.reason];
+            }))
+          ]));
+        }
+
         // ⑧ 收尾结算：一句话说明
         bodySlot.appendChild(ui.section('⑧ 收尾结算（一句话说明，不编号）', [
           dom.h('div', { class: 'ui-card' }, [
@@ -266,6 +315,7 @@
   }
 
   return {
-    buildRows: buildRows, remap: remap, checklistRowId: checklistRowId, render: render
+    buildRows: buildRows, remap: remap, checklistRowId: checklistRowId,
+    buildSafetyNet: buildSafetyNet, render: render
   };
 });
