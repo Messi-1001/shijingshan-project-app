@@ -20,7 +20,8 @@
       { key: 'library',   label: '全量手续库' },
       { key: 'templates', label: '模板库' },
       { key: 'materials', label: '材料清单' },
-      { key: 'platform',  label: '平台办事导航' }
+      { key: 'platform',  label: '平台办事导航' },
+      { key: 'reasons',   label: '退回原因库' }
     ]},
     { title: '筹划', items: [
       { key: 'tender',    label: '招标工作时间计划' },
