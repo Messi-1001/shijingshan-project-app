@@ -22,7 +22,8 @@
     'views.vEstimate', 'data.platforms', 'views.vPlatform',
     'data.rejectReasons', 'views.vReasons',
     'logic.advice', 'views.vAdvice',
-    'logic.search', 'views.vSearch'
+    'logic.search', 'views.vSearch',
+    'logic.backup', 'views.vData'
   ];
 
   function checkModules() {
@@ -119,7 +120,8 @@
       platform:  function (params) { return S.views.vPlatform.render(params); },
       reasons:   function (params) { return S.views.vReasons.render(params); },
       advice:    function (params) { return window.SJSQ.views.vAdvice.render(params); },
-      search:    function (params) { return window.SJSQ.views.vSearch.render(params); }
+      search:    function (params) { return window.SJSQ.views.vSearch.render(params); },
+      data:      function (params) { return window.SJSQ.views.vData.render(params); }
     };
 
     S.core.idb.createBestStore().then(function (store) {

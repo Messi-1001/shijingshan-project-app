@@ -128,7 +128,13 @@
                     body: dom.h('p', { text: '确定删除「' + p.name + '」？此操作不可撤销。' }),
                     confirmText: '删除',
                     onConfirm: function () {
+                      var bk = root.SJSQ && root.SJSQ.logic && root.SJSQ.logic.backup;
                       store.remove('projects', p.id).then(function () {
+                        // 携带项②：删项目顺带清掉它的 checklist 行，不留孤儿。
+                        // backup 模块缺席（异常加载序）时静默跳过，展示层 remap 过滤兜底。
+                        return (bk && bk.pruneOrphanChecklist)
+                          ? bk.pruneOrphanChecklist(store, p.id) : null;
+                      }).then(function () {
                         if (root.SJSQ.app.state.get().currentId === p.id) {
                           root.SJSQ.app.state.set({ currentId: null });
                         }

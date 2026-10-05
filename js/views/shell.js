@@ -32,6 +32,9 @@
       { key: 'schedule',  label: '进度计划与倒排' },
       { key: 'estimate',  label: '投资估算计算器' }
     ]},
+    { title: '数据', items: [
+      { key: 'data', label: '数据管理' }
+    ]},
     { title: '输出', items: [
       { key: 'scheme', label: '方案与效果图' },
       { key: 'export', label: '导出中心' }
