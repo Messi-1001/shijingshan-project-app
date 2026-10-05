@@ -23,7 +23,9 @@
     'data.rejectReasons', 'views.vReasons',
     'logic.advice', 'views.vAdvice',
     'logic.search', 'views.vSearch',
-    'logic.backup', 'views.vData'
+    'logic.backup', 'views.vData',
+    'logic.zip', 'logic.pptx', 'logic.flow', 'views.vExport',
+    'data.schemes', 'views.vScheme'
   ];
 
   function checkModules() {
@@ -121,7 +123,9 @@
       reasons:   function (params) { return S.views.vReasons.render(params); },
       advice:    function (params) { return window.SJSQ.views.vAdvice.render(params); },
       search:    function (params) { return window.SJSQ.views.vSearch.render(params); },
-      data:      function (params) { return window.SJSQ.views.vData.render(params); }
+      data:      function (params) { return window.SJSQ.views.vData.render(params); },
+      scheme:    function (params) { return window.SJSQ.views.vScheme.render(params); },
+      export:    function () { return window.SJSQ.views.vExport.render(); }
     };
 
     S.core.idb.createBestStore().then(function (store) {

@@ -145,3 +145,24 @@
 .search-hit:hover { text-decoration: underline; }
 mark { background: #fff3a8; padding: 0 2px; border-radius: 2px; }
 @media print { .shell-search { display: none; } .view-search .search-box { display: none; } }
+
+/* ---- 导出中心（v-export.js，Task 62）---- */
+.export-list { display: flex; flex-direction: column; gap: 10px; }
+.export-item { border: 1px solid var(--c-border); border-radius: 8px; padding: 12px 14px; background: var(--c-surface); }
+.export-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.export-name { font-size: 15px; font-weight: 600; color: var(--c-text); }
+.export-desc { font-size: 12.5px; color: var(--c-text-sub); margin-top: 4px; line-height: 1.6; }
+.export-status { margin: 8px 0 0; font-size: 12.5px; min-height: 18px; }
+.export-status.ok { color: var(--c-ok, #1a7f45); }
+.export-status.fail { color: var(--c-danger, #c0392b); }
+.export-status.running { color: var(--c-warn, #8a6d1f); }
+.notice { color: var(--c-text-sub); font-size: 13px; }
+@media print { .view-export { display: none; } }
+
+/* ---- 深链聚焦高亮（M3：#/checklist?focus= / #/templates?focus=）---- */
+tr.row-focus > td { background: var(--c-warn-bg, #fff7e0) !important; }
+tr.row-focus { animation: rowFocusFade 1.5s ease-in forwards; }
+@keyframes rowFocusFade {
+  0% { outline: 2px solid var(--c-primary, #3b7ddd); outline-offset: -2px; }
+  100% { outline: 2px solid transparent; outline-offset: -2px; }
+}

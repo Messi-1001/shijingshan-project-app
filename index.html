@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="css/layout.css">
 <link rel="stylesheet" href="css/components.css">
 <link rel="stylesheet" href="css/platform.css">
+<link rel="stylesheet" href="css/scheme.css">
 <link rel="stylesheet" href="css/print.css" media="all">
 <!-- 警告：本文件必须以 file:// 双击打开，禁止改为 type="module"，否则 CORS 报错（G2） -->
 </head>
@@ -37,6 +38,7 @@
   <script src="js/data/templates.js"></script>
   <script src="js/data/platforms.js"></script>
   <script src="js/data/reject-reasons.js"></script>
+  <script src="js/data/schemes.js"></script>
 
   <script src="js/logic/graph.js"></script>
   <script src="js/data/conditions.js"></script>
@@ -58,6 +60,10 @@
   <script src="js/logic/advice.js"></script>
   <script src="js/logic/search.js"></script>
   <script src="js/logic/backup.js"></script>
+  <!-- 顺序不可调整：zip → pptx → flow（pptx 依赖 zip；v-export 依赖三者） -->
+  <script src="js/logic/zip.js"></script>
+  <script src="js/logic/pptx.js"></script>
+  <script src="js/logic/flow.js"></script>
   <script src="js/views/v-tender.js"></script>
   <script src="js/views/gantt.js"></script>
   <script src="js/views/v-schedule.js"></script>
@@ -68,6 +74,8 @@
   <script src="js/views/v-advice.js"></script>
   <script src="js/views/v-search.js"></script>
   <script src="js/views/v-data.js"></script>
+  <script src="js/views/v-scheme.js"></script>
+  <script src="js/views/v-export.js"></script>
   <script src="js/views/shell.js"></script>
   <script src="js/views/v-projects.js"></script>
 

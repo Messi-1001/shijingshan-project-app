@@ -35,6 +35,35 @@
     return String(projectId) + '::' + String(procedureId);
   }
 
+  /* —— M3 深链聚焦：#/checklist?focus=<procedureId> —— */
+
+  // 纯函数（Node 可测）：从 params 里解析 focus 目标 id，无则空串
+  function focusPid(params) {
+    var f = params && params.focus;
+    return f ? String(f).trim() : '';
+  }
+
+  // 纯函数（Node 可测）：在 buildRows 的结果里定位聚焦行，找不到返回 null
+  function pickFocusRow(rows, focus) {
+    var f = focusPid({ focus: focus });
+    if (!f) return null;
+    var list = rows || [];
+    for (var i = 0; i < list.length; i++) if (list[i].id === f) return list[i];
+    return null;
+  }
+
+  // DOM 侧：目标行加高亮 class，滚动到该行，1.5s 后移除高亮
+  function applyFocus(scope, pid) {
+    if (!scope || !pid) return;
+    var el = scope.querySelector('[data-pid="' + pid + '"]');
+    if (!el) return;
+    var tr = el.closest ? el.closest('tr') : null;
+    if (!tr) return;
+    tr.classList.add('row-focus');
+    if (tr.scrollIntoView) tr.scrollIntoView({ block: 'center' });
+    setTimeout(function () { tr.classList.remove('row-focus'); }, 1500);
+  }
+
   /** 纯函数：把手续 + 状态 + 项目四维 → 清单行 */
   function buildRows(list, checklist, projectValues, condMap, projectId) {
     var flt = L('filter'), prog = L('progress');
@@ -133,6 +162,7 @@
     var store = app.store, state = app.state;
 
     var projectId = (params && params.id) || state.get().currentId;
+    var focusId = focusPid(params); // M3：#/checklist?focus=<procedureId> 深链聚焦
 
     var page = dom.h('div', { class: 'page' });
 
@@ -273,6 +303,8 @@
         ]));
 
         bindTableEvents();
+        // M3：paint 是异步重建的，聚焦必须跟在每次重建之后（含 meta 恢复触发的重绘）
+        if (focusId) applyFocus(bodySlot, focusId);
       });
     }
 
@@ -344,6 +376,7 @@
 
   return {
     buildRows: buildRows, remap: remap, checklistRowId: checklistRowId,
-    buildSafetyNet: buildSafetyNet, buildBoard: buildBoard, render: render
+    buildSafetyNet: buildSafetyNet, buildBoard: buildBoard, render: render,
+    focusPid: focusPid, pickFocusRow: pickFocusRow, applyFocus: applyFocus
   };
 });

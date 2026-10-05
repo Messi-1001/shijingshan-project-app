@@ -46,3 +46,17 @@ test('buildRows 未知状态归 idle', () => {
 test('checklistRowId 规则稳定', () => {
   assert.equal(vc.checklistRowId('p-1', 'lx-1'), 'p-1::lx-1');
 });
+
+/* —— M3 深链聚焦：#/checklist?focus=<procedureId> —— */
+test('focusPid 解析 params.focus，缺省为空串', () => {
+  assert.equal(vc.focusPid({ focus: ' lx-1 ' }), 'lx-1');
+  assert.equal(vc.focusPid({}), '');
+  assert.equal(vc.focusPid(null), '');
+});
+
+test('pickFocusRow 在清单行里定位聚焦目标（找不到返回 null）', () => {
+  const rows = vc.buildRows(LIST, {}, c.FIXED_VALUES);
+  assert.equal(vc.pickFocusRow(rows, 'lx-2').id, 'lx-2');
+  assert.equal(vc.pickFocusRow(rows, 'no-such'), null);
+  assert.equal(vc.pickFocusRow(rows, ''), null);
+});
