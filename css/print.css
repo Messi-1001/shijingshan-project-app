@@ -18,4 +18,11 @@
 
   .print-title { font-size: 16pt; font-weight: 600; margin-bottom: 6mm; }
   .print-meta { font-size: 9pt; color: #555; margin-bottom: 8mm; }
+
+  /* 投资估算页（G11：A4 打印适配，合计行不跨页断行） */
+  .view-estimate .card { break-inside: avoid; }
+  .view-estimate table { width: 100%; border-collapse: collapse; }
+  .view-estimate th, .view-estimate td { border: 1px solid #999; padding: 4px 6px; font-size: 10.5pt; }
+  .view-estimate thead { display: table-header-group; }
+  .view-estimate tfoot { display: table-footer-group; }
 }

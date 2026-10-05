@@ -60,11 +60,77 @@
 
   function wordMime() { return 'application/msword'; }
 
+  /* —— 两页纸投资估算表（Task 48）——
+     Word 打开 HTML 对 CSS 支持有限：只用保守表格属性（border/cellpadding）+ SimSun，
+     禁 flex/grid；分页用 <div class="page-break">（page-break-after 最稳）。 */
+
+  function pad2(n) { return (n < 10 ? '0' : '') + n; }
+
+  function formatMoneyCell(n) {
+    var s = String(n == null ? 0 : n);
+    var m = s.match(/^(-?)(\d+)(\.\d+)?$/);
+    if (!m) return s;
+    return m[1] + m[2].replace(/\B(?=(\d{3})+(?!\d))/g, ',') + (m[3] ? m[3].slice(0, 3) : '');
+  }
+
+  function buildEstimateDoc(rows, projectName) {
+    var today = new Date();
+    var dstr = today.getFullYear() + '-' + pad2(today.getMonth() + 1) + '-' + pad2(today.getDate());
+    var css = 'body{font-family:SimSun,serif;font-size:10.5pt;color:#000}' +
+      'h2{text-align:center;font-size:16pt;margin:0 0 4pt}' +
+      'h3{font-size:12pt;margin:14pt 0 6pt}' +
+      'p.meta{text-align:center;font-size:9pt;color:#333;margin:0 0 12pt}' +
+      '.page-break{page-break-after:always}' +
+      'table{border-collapse:collapse;width:100%}' +
+      'th,td{border:1px solid #000;padding:3pt 4pt;font-size:9.5pt}' +
+      'th{background:#eee;text-align:center}' +
+      'td.num{text-align:right}' +
+      'tfoot td{font-weight:bold;background:#f7f7f7}' +
+      'p.note{font-size:9pt;color:#444;margin-top:10pt}';
+
+    function tbl(headers, dataRows, foot) {
+      var t = '<table border="1" cellspacing="0" cellpadding="4"><thead><tr>' +
+        headers.map(function (x) { return '<th>' + escapeCell(x) + '</th>'; }).join('') + '</tr></thead><tbody>' +
+        dataRows.map(function (r) {
+          return '<tr>' + r.map(function (c, i) {
+            return '<td' + (i === r.length - 1 && /^[\d,]+$/.test(String(c)) ? ' class="num"' : '') + '>' + escapeCell(c) + '</td>';
+          }).join('') + '</tr>';
+        }).join('') + '</tbody>';
+      if (foot && foot.length) {
+        t += '<tfoot>' + foot.map(function (r) {
+          return '<tr>' + r.map(function (c) { return '<td>' + escapeCell(c) + '</td>'; }).join('') + '</tr>';
+        }).join('') + '</tfoot>';
+      }
+      return t + '</table>';
+    }
+
+    var page1 = '<h3>一、工程建设其他费估算表</h3>' + tbl(
+      ['序号', '费用名称', '计算基数', '费率', '金额（万元）', '取费依据'],
+      rows.page1.rows,
+      [['', '其他费合计', '', '', formatMoneyCell(rows.page1.total[1]), '']]
+    );
+
+    var page2 = '<h3>二、工程费用构成与项目总投资</h3>' + tbl(
+      ['序号', '费用构成', '比例', '金额（万元）'],
+      rows.page2.rows,
+      [['', '项目总投资', '', formatMoneyCell(rows.page2.total[1])]]
+    ) + '<p class="note">注：取费费率均为前期匡算参考值，最终以现行取费文件与财政评审结论为准。</p>';
+
+    return '<html><head><meta charset="utf-8"><title>' + escapeCell(projectName + '-投资估算表') + '</title>' +
+      '<style>' + css + '</style></head><body>' +
+      '<h2>' + escapeCell(projectName || '未命名项目') + ' 投资估算表</h2>' +
+      '<p class="meta">制表日期：' + dstr + '　金额单位：万元</p>' +
+      page1 +
+      '<div class="page-break"></div>' +
+      page2 +
+      '</body></html>';
+  }
+
   /* 下载触发（与数据构建分离）：仅浏览器环境可用；Node 无 Blob 时安全返回 false。
      数据构建（buildDocHtml / buildTableHtml / docFileName）保持 Node 可测。 */
   function downloadDoc(html, filename) {
     if (typeof Blob === 'undefined' || typeof URL === 'undefined' ||
-        !URL.createObjectURL || typeof document === 'undefined') {
+        !URL.createObjectURL || typeof document === 'undefined' || !document.body) {
       return false;
     }
     var blob = new Blob(['\ufeff', html], { type: wordMime() });
@@ -82,6 +148,7 @@
   return {
     escapeCell: escapeCell, buildTableHtml: buildTableHtml,
     buildDocHtml: buildDocHtml, docFileName: docFileName, wordMime: wordMime,
+    buildEstimateDoc: buildEstimateDoc,
     downloadDoc: downloadDoc
   };
 });
