@@ -20,7 +20,8 @@
     'logic.tender', 'views.v-tender',
     'views.gantt', 'logic.schedule', 'views.vSchedule', 'logic.estimate',
     'views.vEstimate', 'data.platforms', 'views.vPlatform',
-    'data.rejectReasons', 'views.vReasons'
+    'data.rejectReasons', 'views.vReasons',
+    'logic.advice', 'views.vAdvice'
   ];
 
   function checkModules() {
@@ -115,7 +116,8 @@
       schedule:  function (params) { return S.views.vSchedule.render(params); },
       estimate:  function (params) { return S.views.vEstimate.render(params); },
       platform:  function (params) { return S.views.vPlatform.render(params); },
-      reasons:   function (params) { return S.views.vReasons.render(params); }
+      reasons:   function (params) { return S.views.vReasons.render(params); },
+      advice:    function (params) { return window.SJSQ.views.vAdvice.render(params); }
     };
 
     S.core.idb.createBestStore().then(function (store) {

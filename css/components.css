@@ -115,3 +115,20 @@
 .reason-line.muted { color: var(--c-text-sub); }
 .reason-applies { font-size: var(--f-xs); color: var(--c-text-mute); margin-top: var(--s-2); }
 @media print { .view-reasons .tabs, .reasons-filter { display: none; } .reason-card { break-inside: avoid; } }
+
+/* ---- 建议页（v-advice.js）---- */
+.advice-overview { display: flex; gap: var(--s-6); flex-wrap: wrap; }
+.advice-overview .ov-item { display: flex; flex-direction: column; align-items: center; min-width: 84px; }
+.advice-overview .ov-num { font-size: 26px; font-weight: 600; color: var(--c-text); line-height: 1.2; }
+.advice-overview .ov-label { font-size: var(--f-xs); color: var(--c-text-mute); }
+.advice-item { border: 1px solid var(--c-border); border-left-width: 4px; border-radius: var(--r-md); padding: 12px 14px; margin-bottom: 10px; background: var(--c-surface); }
+.advice-item.advice-block { border-left-color: var(--c-danger); background: var(--c-danger-bg); }
+.advice-item.advice-warn { border-left-color: var(--c-warn); background: var(--c-warn-bg); }
+.advice-item.advice-info { border-left-color: var(--c-info); background: var(--c-info-bg); }
+.advice-title { font-size: 15px; font-weight: 600; margin-bottom: 6px; color: var(--c-text); }
+.advice-body { font-size: var(--f-sm); color: var(--c-text); white-space: pre-line; line-height: 1.75; }
+.advice-refs { margin-top: 8px; display: flex; gap: 10px; flex-wrap: wrap; }
+.advice-ref { font-size: var(--f-sm); color: var(--c-primary); text-decoration: none; }
+.advice-ref:hover { text-decoration: underline; }
+.advice-quick { display: flex; gap: 10px; flex-wrap: wrap; }
+@media print { .advice-item { break-inside: avoid; } }

@@ -10,8 +10,12 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function (root) {
   'use strict';
 
-  // 导航分组：与 spec 第 6 节「页面结构」11 个页面一一对应
+  // 导航分组：与 spec 第 6 节「页面结构」11 个页面一一对应。
+  // 「建议」作为首页默认落点单独成组放最前；输出组不再重复列出。
   var NAV_GROUPS = [
+    { title: '首页', items: [
+      { key: 'advice', label: '今日建议' }
+    ]},
     { title: '办理', items: [
       { key: 'projects',  label: '项目管理' },
       { key: 'checklist', label: '我的项目专属清单' }
@@ -29,7 +33,6 @@
       { key: 'estimate',  label: '投资估算计算器' }
     ]},
     { title: '输出', items: [
-      { key: 'advice', label: '建议引擎' },
       { key: 'scheme', label: '方案与效果图' },
       { key: 'export', label: '导出中心' }
     ]}
@@ -71,7 +74,7 @@
     var r = router.createRouter({
       routes: opts.routes,
       mount: mainEl,
-      fallback: 'projects'
+      fallback: 'advice'   // 首页默认落点：建议页
     });
 
     r.onChange(function (cur) {
