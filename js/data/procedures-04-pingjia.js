@@ -65,7 +65,7 @@
     mk({
       id: 'pj-6', no: 26, name: '节能评估', section: 'pingjia',
       dept: '发展改革 / 住房和城乡建设部门', duration: '', durationDays: null, prev: [],
-      parallel: true, reserved: true, source: '预留',
+      parallel: true,
       notes: '**预留项（仅登记名称，暂不展开）**。触发条件：按规定需单独做节能审查的项目。',
       basis: '固定资产投资项目节能审查办法',
       materials: [], source: '预留', reserved: true
@@ -73,7 +73,7 @@
     mk({
       id: 'pj-7', no: 27, name: '地震安全性评价', section: 'pingjia',
       dept: '地震部门', duration: '', durationDays: null, prev: [],
-      parallel: true, reserved: true, source: '预留',
+      parallel: true,
       notes: '**预留项（仅登记名称，暂不展开）**。触发条件：按规定需做地震安全性评价的工程。',
       basis: '地震安全性评价管理条例',
       materials: [], source: '预留', reserved: true
@@ -81,7 +81,7 @@
     mk({
       id: 'pj-8', no: 28, name: '地质灾害评估', section: 'pingjia',
       dept: '规划和自然资源部门', duration: '', durationDays: null, prev: [],
-      parallel: true, reserved: true, source: '预留',
+      parallel: true,
       notes: '**预留项（仅登记名称，暂不展开）**。触发条件：位于地质灾害易发区的项目。',
       basis: '地质灾害防治条例',
       materials: [], source: '预留', reserved: true
