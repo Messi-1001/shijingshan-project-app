@@ -1,0 +1,25 @@
+{
+  "date": "2026-10-05T09:58:07.933Z",
+  "url": "file:///D:/4workbuddy%E5%B7%A5%E4%BD%9C%E7%A9%BA%E9%97%B4/2%E6%AF%95%E4%B8%9A%E8%AE%BE%E8%AE%A1/3%E4%BB%A3%E7%A0%81%E5%AE%9E%E6%96%BD/index.html",
+  "userAgent": "chromium headless (playwright)",
+  "firstPaintMs": 129,
+  "checklistFirstRenderMs": 61,
+  "checklistRows": 40,
+  "searchAvgMs": 0.3,
+  "extra": {
+    "schedule": 0.1,
+    "flow": 0.2
+  },
+  "pageErrors": [],
+  "budget": {
+    "firstPaint": 300,
+    "checklistFirstRender": 300,
+    "searchAvg": 200
+  },
+  "pass": {
+    "firstPaint": true,
+    "checklistFirstRender": true,
+    "searchAvg": true
+  },
+  "allPass": true
+}
