@@ -65,8 +65,21 @@
       ]);
     })));
 
+    // 顶栏全局搜索框（Task 56，G24）：回车 / 点按钮跳 #/search?q=...，参数走查询串
+    var searchBox = document.createElement('form');
+    searchBox.className = 'shell-search';
+    searchBox.innerHTML =
+      '<input type="search" name="q" placeholder="搜索手续 / 模板 / 退回原因 / 平台" />' +
+      '<button type="submit">搜索</button>';
+    searchBox.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var v = searchBox.querySelector('[name=q]').value;
+      root.location.hash = router.buildHash('search', { q: v });
+    });
+
     var top = dom.h('header', { class: 'app-top' }, [
-      dom.h('span', { class: 'app-top__title', text: '石景山区学校工程「前期手续 → 竣工验收」辅助系统' })
+      dom.h('span', { class: 'app-top__title', text: '石景山区学校工程「前期手续 → 竣工验收」辅助系统' }),
+      searchBox
     ]);
 
     var shellRoot = dom.h('div', { class: 'app' }, [side, top, bannerZone, mainEl]);

@@ -132,3 +132,16 @@
 .advice-ref:hover { text-decoration: underline; }
 .advice-quick { display: flex; gap: 10px; flex-wrap: wrap; }
 @media print { .advice-item { break-inside: avoid; } }
+
+/* ---- 全局搜索（shell 顶栏 + v-search.js，Task 56）---- */
+.shell-search { display: flex; gap: 6px; margin-left: auto; }
+.shell-search input { width: 260px; padding: 5px 10px; border: 1px solid var(--c-border-strong); border-radius: 6px; font-size: 13px; background: var(--c-surface); }
+.shell-search button { padding: 5px 12px; border: 1px solid var(--c-border-strong); border-radius: 6px; background: #fff; cursor: pointer; font-size: 13px; }
+.view-search .search-box { display: flex; gap: 10px; align-items: flex-end; max-width: 560px; }
+.view-search .search-box .ui-field { flex: 1; margin: 0; }
+.view-search .search-input { width: 100%; padding: 7px 10px; border: 1px solid var(--c-border-strong); border-radius: var(--r-md); font-size: var(--f-md); }
+.view-search .search-note { margin: 0 0 var(--s-2); color: var(--c-text-sub); font-size: var(--f-sm); }
+.search-hit { color: var(--c-primary); text-decoration: none; }
+.search-hit:hover { text-decoration: underline; }
+mark { background: #fff3a8; padding: 0 2px; border-radius: 2px; }
+@media print { .shell-search { display: none; } .view-search .search-box { display: none; } }
