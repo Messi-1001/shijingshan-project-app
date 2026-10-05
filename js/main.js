@@ -60,6 +60,10 @@
     if (out.errors.length) {
       console.error('手续数据校验不通过：\n' + out.errors.join('\n'));
     }
+    var tpl = S.data.templates;
+    var tplOut = tpl.build();
+    S.app.templates = { list: tplOut.list, byId: tplOut.byId, errors: tplOut.errors };
+    if (tplOut.errors.length) console.error('模板索引校验不通过：\n' + tplOut.errors.join('\n'));
     return out;
   }
 
