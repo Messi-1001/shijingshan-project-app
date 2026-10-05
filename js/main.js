@@ -18,7 +18,7 @@
     'views.v-checklist', 'views.v-templates', 'views.v-templates-custom',
     'logic.materials', 'views.v-materials',
     'logic.tender', 'views.v-tender',
-    'views.gantt', 'logic.schedule', 'views.vSchedule'
+    'views.gantt', 'logic.schedule', 'views.vSchedule', 'logic.estimate'
   ];
 
   function checkModules() {
