@@ -57,3 +57,37 @@ test('STATUS_MAP 与常量导出', () => {
   assert.deepEqual(t.TENDER_TYPES, ['设计', '勘察', '监理', '施工']);
   assert.equal(t.PHASES.length, 7);
 });
+
+test('adviseMethod：技术复杂 → 资格预审', () => {
+  const r = t.adviseMethod({ techComplexity: true, complexity: '高', urgency: '正常' });
+  assert.equal(r.method, '资格预审');
+  assert.ok(r.reasons.length >= 1);
+});
+
+test('adviseMethod：工期紧张 → 资格后审', () => {
+  const r = t.adviseMethod({ urgency: '紧张', complexity: '中' });
+  assert.equal(r.method, '资格后审');
+});
+
+test('adviseMethod：条件中性默认资格后审', () => {
+  assert.equal(t.adviseMethod({}).method, '资格后审');
+});
+
+test('adviseMethod：给出周期天数与关键节点', () => {
+  const r = t.adviseMethod({ urgency: '紧张' });
+  assert.ok(r.periodDays > 0);
+  assert.ok(r.keyNodes.length >= 5);
+  assert.ok(r.keyNodes.every((n) => typeof n.days === 'number'));
+});
+
+test('adviseMethod：预审周期必然长于后审（同类型）', () => {
+  const pre = t.adviseMethod({ techComplexity: true });
+  const post = t.adviseMethod({ techComplexity: false });
+  assert.ok(pre.periodDays > post.periodDays);
+});
+
+test('adviseMethod：特殊要求触发预审并给出风险提示', () => {
+  const r = t.adviseMethod({ hasSpecialRequirements: true });
+  assert.equal(r.method, '资格预审');
+  assert.ok(r.risks.some((x) => x.includes('周期')));
+});

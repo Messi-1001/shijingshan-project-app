@@ -78,8 +78,51 @@
     return TENDER_TYPES.map(function (tp) { return buildTimeline(tp, opts); });
   }
 
+  var REASONS_TEXT = {
+    tech:   '工程技术复杂或含特殊专业工程，宜先做资格预审筛出有能力的投标人。',
+    special:'项目有特殊资质或业绩要求，需通过资格预审把不符条件的挡在门外。',
+    many:   '潜在投标人较多，资格预审可降低评标工作量。',
+    urgent: '工期紧张，资格预审会额外拉长招标周期，宜采用资格后审。',
+    normal: '工程常规、潜在投标人数量适中，资格后审可缩短整体周期。',
+    low:    '工程复杂度低，无需前置筛选，资格后审更经济。'
+  };
+
+  function adviseMethod(input) {
+    var i = input || {};
+    var reasons = [];
+    var risks = [];
+    var preferPre = false;
+
+    if (i.techComplexity || i.complexity === '高') {
+      preferPre = true;
+      reasons.push(REASONS_TEXT.tech);
+    }
+    if (i.hasSpecialRequirements) { preferPre = true; reasons.push(REASONS_TEXT.special); }
+    if (i.manyBidders) { preferPre = true; reasons.push(REASONS_TEXT.many); }
+    if (i.urgency === '紧张') { preferPre = false; reasons.push(REASONS_TEXT.urgent); }
+    if (i.complexity === '低') { preferPre = false; reasons.push(REASONS_TEXT.low); }
+    if (!reasons.length) reasons.push(REASONS_TEXT.normal);
+
+    var method = preferPre ? '资格预审' : '资格后审';
+    var tl = buildTimeline('施工', { startDate: '2026-01-01', preQualification: method === '资格预审' });
+
+    var keyNodes = tl.phases.map(function (p) { return { name: p.name, days: p.days }; });
+
+    if (method === '资格预审') {
+      risks.push('资格预审会额外增加约 ' + (PRE_QUALIFY_EXTRA.preQualification + PRE_QUALIFY_EXTRA.preQualifyReview) +
+        ' 天招标周期，与"工期紧张"目标存在冲突，需评估是否来得及。');
+      risks.push('资格预审文件的资格条件设置不当易引发质疑投诉。');
+    } else {
+      risks.push('资格后审时，若投标人过多会显著增加评标工作量，需预留评标时间。');
+    }
+    if (!i.urgency) risks.push('未指定工期紧迫度，已按"正常"处理。');
+
+    return { method: method, reasons: reasons, periodDays: tl.totalDays, risks: risks, keyNodes: keyNodes };
+  }
+
   return {
     TENDER_TYPES: TENDER_TYPES, STATUS_MAP: STATUS_MAP, PHASES: PHASES, TYPE_FACTOR: TYPE_FACTOR,
-    addDays: addDays, buildTimeline: buildTimeline, buildAllTimelines: buildAllTimelines
+    addDays: addDays, buildTimeline: buildTimeline, buildAllTimelines: buildAllTimelines,
+    adviseMethod: adviseMethod
   };
 });
