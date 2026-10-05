@@ -13,8 +13,9 @@
     'core.ns', 'core.util', 'core.dom', 'core.store', 'core.idb', 'core.router',
     'core.state', 'data.schema', 'data.index', 'data.guidance', 'logic.graph',
     'data.conditions', 'logic.filter', 'logic.progress', 'logic.exporters',
+    'logic.renderTemplate',
     'views.ui', 'views.shell', 'views.v-projects', 'views.v-library', 'views.v-detail',
-    'views.v-checklist'
+    'views.v-checklist', 'views.v-templates'
   ];
 
   function checkModules() {
@@ -87,16 +88,6 @@
     return bar;
   }
 
-  // 阶段三、四才实现的页面的占位路由（checklist / templates 属阶段三、四；library / detail 已接线）
-  function TODO(label) {
-    return function () {
-      return S.core.dom.h('div', { class: 'page' }, [
-        S.core.dom.h('h1', { text: label }),
-        S.views.ui.empty('本页面将在后续阶段实现', '')
-      ]);
-    };
-  }
-
   function boot() {
     if (!checkModules()) return;
 
@@ -113,7 +104,7 @@
       library:   function () { return S.views['v-library'].render(); },
       detail:    function (params) { return S.views['v-detail'].render(params); },
       checklist: function (p) { return S.views['v-checklist'].render(p); },
-      templates: TODO('模板库')
+      templates: function (p) { return S.views['v-templates'].render(p); }
     };
 
     S.core.idb.createBestStore().then(function (store) {

@@ -111,3 +111,7 @@
 .board__fill--doing { background: var(--c-warn); }
 .board__fill--done  { background: var(--c-ok); }
 .board__num { font-size: var(--f-xs); color: var(--c-text-mute); margin-top: var(--s-1); }
+
+/* 页面 5：申请资料模板库（Task 33） */
+.tpl-path { font-size: var(--f-xs); color: var(--c-text-mute); margin-top: 2px; }
+.tpl-actions { display: flex; gap: var(--s-2); flex-wrap: wrap; }
