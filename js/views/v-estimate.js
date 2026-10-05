@@ -19,7 +19,9 @@
     );
   }
 
-  // 纯函数（Node 可测）：转发 estimate.buildTwopage，第二页补基本预备费行并加合计
+  // 纯函数（Node 可测）：转发 estimate.buildTwopage，第二页补基本预备费行并加合计。
+  // 显示口径一致性：分项行按 formatMoney 四舍五入后，合计行取「取整分项之和」，
+  // 避免「行之和 1588 ≠ 合计 1589」的 1 万元毛刺；内核原始值（raw/summary）不动。
   function buildRows(est) {
     var e = est && est.items ? est : estimate.calcEstimate({ 工程费用: (est && est.工程费用) || 0 });
     var tp = estimate.buildTwopage(e);
@@ -30,11 +32,15 @@
       return [r.no, r.name, r.ratio, util.formatMoney(r.amount)];
     });
     // 第二页补基本预备费（合计行不混入明细，走 total / tfoot）
+    var dispReserve = Math.round(e.reserve);
     page2rows.push(['4', '基本预备费', (estimate.RESERVE_RATE * 100).toFixed(0) + '%', util.formatMoney(e.reserve)]);
+    var dispOther = tp.page1.reduce(function (s, r) { return s + Math.round(r.amount); }, 0);
+    var dispTotal = tp.summary.工程费用 + dispOther + dispReserve;
     return {
-      page1: { rows: page1rows, total: ['其他费合计（万元）', e.otherSubtotal] },
-      page2: { rows: page2rows, total: ['项目总投资（万元）', e.projectTotal] },
+      page1: { rows: page1rows, total: ['其他费合计（万元）', dispOther] },
+      page2: { rows: page2rows, total: ['项目总投资（万元）', dispTotal] },
       summary: tp.summary,
+      disp: { 其他费合计: dispOther, 基本预备费: dispReserve, projectTotal: dispTotal },
       raw: e,
     };
   }
@@ -73,9 +79,9 @@
       body.appendChild(ui.card('估算汇总', ui.table(
         ['项目', '金额（万元）'],
         [['工程费用', util.formatMoney(r.summary.工程费用)],
-         ['工程建设其他费', util.formatMoney(r.summary.其他费合计)],
-         ['基本预备费', util.formatMoney(r.summary.基本预备费)],
-         ['项目总投资', util.formatMoney(r.summary.projectTotal)],
+         ['工程建设其他费', util.formatMoney(r.disp.其他费合计)],
+         ['基本预备费', util.formatMoney(r.disp.基本预备费)],
+         ['项目总投资', util.formatMoney(r.disp.projectTotal)],
          ['其他费占比', r.summary.其他费占比 + '%']]
       )));
       body.appendChild(ui.card('免责说明', h('p', { class: 'notice' },

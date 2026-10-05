@@ -45,10 +45,21 @@ test('buildRows 含两页与合计行', () => {
   assert.ok(r.page2.total[1] > 0);
 });
 
-test('合计行金额与内核一致', () => {
+test('合计行金额与内核一致（±1 取整容差内）', () => {
   const r = ve.buildRows({ 工程费用: 20000 });
-  assert.equal(r.page1.total[1], r.summary.其他费合计);
-  assert.equal(r.summary.projectTotal, r.page2.total[1]);
+  assert.ok(Math.abs(r.page1.total[1] - r.summary.其他费合计) <= 1);
+  assert.ok(Math.abs(r.summary.projectTotal - r.page2.total[1]) <= 1);
+});
+
+test('显示口径一致：合计 = 取整分项之和（页面与导出 Word 同口径）', () => {
+  const r = ve.buildRows({ 工程费用: 20000 });
+  const p1sum = r.page1.rows.reduce((s, row) => s + Number(String(row[4]).replace(/,/g, '')), 0);
+  assert.equal(r.page1.total[1], p1sum, '第一页合计应等于取整分项之和');
+  const p2rows = r.page2.rows;
+  const reserve = Number(String(p2rows[p2rows.length - 1][3]).replace(/,/g, ''));
+  assert.equal(r.page2.total[1], r.summary.工程费用 + r.page1.total[1] + reserve,
+    '第二页总投资 = 工程费用 + 其他费合计 + 基本预备费（显示口径闭环）');
+  assert.equal(r.summary.projectTotal, r.raw.projectTotal, '内核原始值不被显示口径污染');
 });
 
 test('page2 末行是基本预备费，费率与内核一致', () => {
