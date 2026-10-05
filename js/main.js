@@ -12,7 +12,9 @@
   var REQUIRED = [
     'core.ns', 'core.util', 'core.dom', 'core.store', 'core.idb', 'core.router',
     'core.state', 'data.schema', 'data.index', 'data.guidance', 'logic.graph',
-    'views.ui', 'views.shell', 'views.v-projects', 'views.v-library', 'views.v-detail'
+    'data.conditions', 'logic.filter', 'logic.progress', 'logic.exporters',
+    'views.ui', 'views.shell', 'views.v-projects', 'views.v-library', 'views.v-detail',
+    'views.v-checklist'
   ];
 
   function checkModules() {
@@ -106,7 +108,7 @@
       projects:  function () { return S.views['v-projects'].render(); },
       library:   function () { return S.views['v-library'].render(); },
       detail:    function (params) { return S.views['v-detail'].render(params); },
-      checklist: TODO('我的项目专属清单'),
+      checklist: function (p) { return S.views['v-checklist'].render(p); },
       templates: TODO('模板库')
     };
 

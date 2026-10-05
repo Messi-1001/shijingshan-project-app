@@ -87,3 +87,12 @@
 
 /* 全量手续库：名称行内串/并联小标签（Task 23 补丁） */
 .lib-name .ui-tag { margin-left: 6px; }
+
+/* 页面 2：我的项目专属清单（Task 28） */
+.cl-overview { display: flex; align-items: center; gap: var(--s-8); flex-wrap: wrap; }
+.cl-stats { font-size: var(--f-sm); color: var(--c-text-sub); display: grid; gap: var(--s-1); }
+.cl-stats strong { color: var(--c-text); font-size: var(--f-lg); }
+.cl-next { margin-top: var(--s-2); }
+.cl-status { padding: 2px var(--s-1); border: 1px solid var(--c-border-strong); border-radius: var(--r-sm); }
+.cl-note { width: 100%; min-width: 140px; padding: 2px var(--s-1); border: 1px solid var(--c-border); border-radius: var(--r-sm); }
+.cl-blocked { font-size: var(--f-xs); color: var(--c-warn); }
