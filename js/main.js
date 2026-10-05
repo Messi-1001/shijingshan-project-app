@@ -19,7 +19,7 @@
     'logic.materials', 'views.v-materials',
     'logic.tender', 'views.v-tender',
     'views.gantt', 'logic.schedule', 'views.vSchedule', 'logic.estimate',
-    'views.vEstimate'
+    'views.vEstimate', 'data.platforms', 'views.vPlatform'
   ];
 
   function checkModules() {
@@ -112,7 +112,8 @@
       materials: function (p) { return S.views['v-materials'].render(p); },
       tender:    function () { return S.views['v-tender'].render(); },
       schedule:  function (params) { return S.views.vSchedule.render(params); },
-      estimate:  function (params) { return S.views.vEstimate.render(params); }
+      estimate:  function (params) { return S.views.vEstimate.render(params); },
+      platform:  function (params) { return S.views.vPlatform.render(params); }
     };
 
     S.core.idb.createBestStore().then(function (store) {

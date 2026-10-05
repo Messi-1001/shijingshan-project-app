@@ -1,0 +1,10 @@
+/* css/platform.css —— 平台办事导航页（浅色主题，仅用 tokens.css 设计令牌） */
+.view-platform .tabs { display: flex; gap: var(--s-2); margin-bottom: var(--s-3); }
+.view-platform .tab { padding: 6px 14px; border: 1px solid var(--c-border); border-radius: var(--r-md); background: var(--c-surface); color: var(--c-text); text-decoration: none; font-size: var(--f-md); }
+.view-platform .tab.active { background: var(--c-primary); border-color: var(--c-primary); color: #fff; }
+.view-platform .plat-scope { margin: 0 0 var(--s-2); color: var(--c-text); }
+.view-platform .plat-meta { margin: 0; padding-left: 18px; font-size: var(--f-sm); color: var(--c-text-sub); line-height: 1.9; }
+.view-platform .plat-meta a { color: var(--c-primary); word-break: break-all; }
+.view-platform .ui-steps__item { white-space: pre-line; }
+.view-platform .notice { margin: 0; color: var(--c-text-sub); font-size: var(--f-sm); }
+@media print { .view-platform .tabs { display: none; } }
