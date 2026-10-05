@@ -102,7 +102,8 @@
     }
     function writeAll(all) { root.localStorage.setItem(KEY, JSON.stringify(all)); }
     return {
-      kind: 'localStorage', degraded: true, reason: 'IndexedDB 不可用，已降级为 localStorage',
+      kind: 'localStorage', degraded: true,
+      reason: '当前浏览器不支持本地数据库，已改用轻量存储（localStorage）',
       get: function (table, id) {
         var all = readAll();
         var row = (all[table] || {})[id];
@@ -148,7 +149,7 @@
       return createIdbStore().catch(function () {
         var store = createLocalStorageStore();
         store.degraded = true;
-        store.reason = 'IndexedDB 打开失败，已降级为 localStorage';
+        store.reason = '本地数据库打开失败，已改用轻量存储（localStorage）';
         return store;
       });
     }

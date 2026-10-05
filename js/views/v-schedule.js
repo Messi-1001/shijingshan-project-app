@@ -74,7 +74,11 @@
         state.input.mode = m;
         state.input.startDate = head.querySelector('[name=startDate]').value || state.input.startDate;
         state.input.targetEndDate = head.querySelector('[name=targetEndDate]').value || state.input.targetEndDate;
-        store.put('meta', { id: META_ID, value: state.input });
+        // Task 68：写入失败（如配额满）必须可见，禁止静默
+        try {
+          store.put('meta', { id: META_ID, value: state.input })
+            .catch(function (e) { ui.saveError(e); });
+        } catch (e) { ui.saveError(e); }
         draw();
       }
     }

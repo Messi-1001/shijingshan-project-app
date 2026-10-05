@@ -166,3 +166,12 @@ tr.row-focus { animation: rowFocusFade 1.5s ease-in forwards; }
   0% { outline: 2px solid var(--c-primary, #3b7ddd); outline-offset: -2px; }
   100% { outline: 2px solid transparent; outline-offset: -2px; }
 }
+
+/* ---- 存储降级横幅（Task 68：warn=localStorage 降级 / danger=内存降级）---- */
+.degrade-bar { display: flex; align-items: center; gap: 12px; padding: 8px 14px; font-size: 13px; }
+.degrade-bar.warn { background: #fff8e1; border-bottom: 1px solid #f0d48a; color: #7a5c11; }
+.degrade-bar.danger { background: #fdecea; border-bottom: 1px solid #f0a89f; color: #a52a1a; }
+.degrade-text { flex: 1 1 auto; }
+.degrade-link { color: inherit; text-decoration: underline; }
+.degrade-close { border: none; background: transparent; font-size: 16px; cursor: pointer; color: inherit; }
+@media print { .degrade-bar { display: none; } }

@@ -131,7 +131,10 @@
     form.addEventListener('change', function () {
       readForm();
       if (store) {
-        try { store.put('meta', { id: META_ID, value: state }); } catch (e) { /* 存储失败不打断页面 */ }
+        // Task 68：写入失败（如配额满）必须可见，禁止静默；localStorage 实现可能同步抛错
+        try {
+          store.put('meta', { id: META_ID, value: state }).catch(function (e) { ui.saveError(e); });
+        } catch (e) { ui.saveError(e); }
       }
       paint();
     });

@@ -64,7 +64,12 @@
           state.input.projectName = form.querySelector('[name=projectName]').value;
           state.input.工程费用 = util.parseNum(form.querySelector('[name=gcfy]').value);
           if (!(state.input.工程费用 > 0)) { alert('工程费用必须为正数'); return; }
-          store.put('meta', { id: META_ID, value: state.input }); draw();
+          // Task 68：写入失败（如配额满）必须可见，禁止静默
+          try {
+            store.put('meta', { id: META_ID, value: state.input })
+              .catch(function (e) { ui.saveError(e); });
+          } catch (e) { ui.saveError(e); }
+          draw();
         } }),
       ]);
       body.appendChild(form);

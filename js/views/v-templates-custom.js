@@ -60,7 +60,14 @@
   }
 
   function saveCustom(store, list) {
-    return store.put('meta', { id: META_ID, list: list || [] });
+    // Task 68：写入失败（如配额满）必须可见，禁止静默；localStorage 实现可能同步抛错
+    try {
+      return store.put('meta', { id: META_ID, list: list || [] })
+        .catch(function (e) { root.SJSQ.views.ui.saveError(e); });
+    } catch (e) {
+      root.SJSQ.views.ui.saveError(e);
+      return Promise.resolve();
+    }
   }
 
   function openAddDialog(store, proceduresData, onDone) {

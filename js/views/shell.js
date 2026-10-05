@@ -105,9 +105,20 @@
     });
 
     if (storeInfo.reason) {
-      bannerZone.appendChild(dom.h('div', { class: 'app-banner' }, [
-        '⚠ ', storeInfo.reason
-      ]));
+      // Task 68 降级横幅：localStorage 降级=黄条 warn；内存降级=红条 danger。
+      // 带「去导出备份」直链与关闭按钮；保留 app-banner 类以兼容既有横幅区样式与测试。
+      var bar = dom.h('div', {
+        class: 'app-banner degrade-bar ' + (storeInfo.kind === 'memory' ? 'danger' : 'warn'),
+        role: 'alert'
+      }, [
+        dom.h('span', { class: 'degrade-text', text: storeInfo.reason }),
+        dom.h('a', { class: 'degrade-link', href: '#/data', text: '去导出备份' }),
+        dom.h('button', {
+          class: 'degrade-close', type: 'button', 'aria-label': '关闭', text: '×',
+          onclick: function () { if (bar.parentNode) bar.parentNode.removeChild(bar); }
+        })
+      ]);
+      bannerZone.appendChild(bar);
     }
 
     shellRoot.__router = r;

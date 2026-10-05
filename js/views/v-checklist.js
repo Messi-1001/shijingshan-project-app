@@ -318,7 +318,15 @@
         row.updatedAt = root.SJSQ.core.util.formatDate(new Date()) + ' ' +
           root.SJSQ.core.util.pad2(new Date().getHours()) + ':' +
           root.SJSQ.core.util.pad2(new Date().getMinutes());
-        return store.put('checklist', row);
+        // Task 68：写入失败（如配额满）必须可见，禁止静默；localStorage 实现可能同步抛错
+        try {
+          return store.put('checklist', row).catch(function (e) {
+            root.SJSQ.views.ui.saveError(e);
+          });
+        } catch (e) {
+          root.SJSQ.views.ui.saveError(e);
+          return Promise.resolve(row);
+        }
       });
     }
 

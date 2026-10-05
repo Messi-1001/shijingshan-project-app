@@ -194,10 +194,24 @@
     }));
   }
 
+  // 存储写入失败统一反馈（Task 68）：捕获了就必须让用户看见一句话，禁止空 catch。
+  // 配额满给「导出备份后清理」指引；其余给「检查站点数据是否被禁用」指引。
+  function saveError(err) {
+    var msg = '保存失败：数据未能写入本地存储，本次修改未保存。请到「数据管理」页导出备份';
+    var detail = String((err && err.message) || err || '');
+    if (/quota|空间不足|exceed/i.test(detail)) {
+      msg = '保存失败：存储空间不足，请到「数据管理」页导出备份后清理';
+    }
+    try { console.error('[ui.saveError] 存储写入失败：', err); } catch (e) { /* console 不可用时仍有 alert */ }
+    if (root && typeof root.alert === 'function') root.alert(msg);
+    return msg;
+  }
+
   return {
     STATUS: STATUS, statusMeta: statusMeta, statusTag: statusTag,
     card: card, section: section, table: table, tag: tag, button: button,
     empty: empty, modal: modal, field: field, ring: ring,
-    timelineBar: timelineBar, stepCards: stepCards
+    timelineBar: timelineBar, stepCards: stepCards,
+    saveError: saveError
   };
 });

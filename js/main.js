@@ -145,7 +145,7 @@
     }).then(function (store) {
       var shell = S.views.shell.createShell({
         store: store,
-        storeInfo: { reason: store.reason || '' },
+        storeInfo: { reason: store.reason || '', kind: store.kind, degraded: !!store.degraded },
         routes: routes
       });
       var rootEl = document.getElementById('app');
