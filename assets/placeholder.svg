@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720">
+  <rect width="1280" height="720" fill="#eef1f5"/>
+  <g stroke="#c9ced6" stroke-width="2" fill="none">
+    <rect x="40" y="40" width="1200" height="640" rx="12"/>
+    <path d="M40 560 L1240 560"/>
+  </g>
+  <g fill="#dbe3ec">
+    <rect x="180" y="330" width="300" height="230" rx="6"/>
+    <rect x="530" y="380" width="240" height="180" rx="6"/>
+    <rect x="820" y="300" width="280" height="260" rx="6"/>
+  </g>
+  <g fill="#b9c2cd">
+    <circle cx="790" cy="250" r="46"/>
+    <rect x="740" y="230" width="10" height="52"/>
+  </g>
+  <text x="640" y="150" text-anchor="middle" font-family="Microsoft YaHei,SimSun,sans-serif" font-size="36" fill="#8a939e">效果图占位（待生成）</text>
+  <text x="640" y="196" text-anchor="middle" font-family="Microsoft YaHei,SimSun,sans-serif" font-size="20" fill="#a7b0ba">该位置将由概念鸟瞰效果图替换</text>
+</svg>

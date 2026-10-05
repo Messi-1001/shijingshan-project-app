@@ -29,6 +29,35 @@
     });
   }
 
+  /* —— M3 深链聚焦：#/templates?focus=<templateId> —— */
+
+  // 纯函数（Node 可测）：从 params 里解析 focus 目标 id，无则空串
+  function focusTid(params) {
+    var f = params && params.focus;
+    return f ? String(f).trim() : '';
+  }
+
+  // 纯函数（Node 可测）：在模板列表里定位聚焦目标，找不到返回 null
+  function pickFocusTemplate(list, focus) {
+    var f = focusTid({ focus: focus });
+    if (!f) return null;
+    var arr = list || [];
+    for (var i = 0; i < arr.length; i++) if (arr[i].id === f) return arr[i];
+    return null;
+  }
+
+  // DOM 侧：目标行加高亮 class，滚动到该行，1.5s 后移除高亮
+  function applyFocus(scope, tid) {
+    if (!scope || !tid) return;
+    var el = scope.querySelector('[data-tid="' + tid + '"]');
+    if (!el) return;
+    var tr = el.closest ? el.closest('tr') : null;
+    if (!tr) return;
+    tr.classList.add('row-focus');
+    if (tr.scrollIntoView) tr.scrollIntoView({ block: 'center' });
+    setTimeout(function () { tr.classList.remove('row-focus'); }, 1500);
+  }
+
   function render(params) {
     var dom = root.SJSQ.core.dom;
     var ui = root.SJSQ.views.ui;
@@ -38,6 +67,7 @@
     var store = (root.SJSQ.app && root.SJSQ.app.store) || null;
     var customList = [];
     var keyword = (params && params.sub) || '';
+    var focusId = focusTid(params); // M3：#/templates?focus=<templateId> 深链聚焦
 
     // 终审 I-2：预取当前项目（state.currentId → store），供复制/导出时把占位符填成真实值。
     // store.get 是异步的，render 同步返回，先挂 null，取到后回调闭包内生效（点击必晚于此）。
@@ -87,7 +117,7 @@
               }).join('、');
 
               return [
-                dom.h('div', {}, [
+                dom.h('div', { dataset: { tid: t.id } }, [
                   // 终审 I-1：显示通用化名（label || fileName），fileName 不进 UI
                   dom.h('strong', { text: data.displayName(t) }),
                   dom.h('div', { class: 'tpl-path', text: t.dir })
@@ -132,6 +162,9 @@
             }), { empty: '' })
         ]));
       });
+
+      // M3：paint 可能被搜索/自定义模板加载触发多次，聚焦跟随每次重建
+      if (focusId) applyFocus(body, focusId);
     }
 
     var deb = root.SJSQ.core.util.debounce(function () { paint(input.value); }, 120);
@@ -156,5 +189,5 @@
     return page;
   }
 
-  return { CATEGORY_ORDER: CATEGORY_ORDER, groupByCategory: groupByCategory, searchCustom: searchCustom, render: render };
+  return { CATEGORY_ORDER: CATEGORY_ORDER, groupByCategory: groupByCategory, searchCustom: searchCustom, render: render, focusTid: focusTid, pickFocusTemplate: pickFocusTemplate, applyFocus: applyFocus };
 });

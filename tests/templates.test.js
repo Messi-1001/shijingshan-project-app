@@ -85,3 +85,20 @@ test('getByPlaceholder 找到占位符模板', () => {
   const one = out.list.find((x) => x.placeholderId);
   if (one) assert.equal(t.getByPlaceholder(one.placeholderId).id, one.id);
 });
+
+/* —— M3 深链聚焦：#/templates?focus=<templateId> —— */
+test('focusTid 解析 params.focus，缺省为空串', () => {
+  const vt = require('../js/views/v-templates.js');
+  assert.equal(vt.focusTid({ focus: ' tpl-9 ' }), 'tpl-9');
+  assert.equal(vt.focusTid({}), '');
+  assert.equal(vt.focusTid(null), '');
+});
+
+test('pickFocusTemplate 在模板列表里定位聚焦目标（找不到返回 null）', () => {
+  const vt = require('../js/views/v-templates.js');
+  const out = t.build();
+  const hit = vt.pickFocusTemplate(out.list, out.list[0].id);
+  assert.equal(hit.id, out.list[0].id);
+  assert.equal(vt.pickFocusTemplate(out.list, 'no-such'), null);
+  assert.equal(vt.pickFocusTemplate(out.list, ''), null);
+});
