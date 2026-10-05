@@ -1,28 +1,119 @@
-/* css/print.css —— A4 打印（G11） */
-@page { size: A4; margin: 14mm; }
+/* css/print.css —— A4 打印全面适配（Task 65，G11）
+   目标：A4 纵向（210mm × 297mm），清单/材料/估算/进度/方案/建议六类页面打印可用。
+   7 条硬要求：
+   1. @page A4 portrait + 页边距
+   2. 隐藏导航/按钮/搜索框/Tab/导出卡
+   3. thead 跨页重复表头
+   4. tfoot 合计行跟随表尾
+   5. tr/.card 不被拦腰截断
+   6. 甘特图/效果图/流程图容器整块不跨页
+   7. 正文 10.5pt、表头灰底、1px 实线边框（黑白打印机可辨）
+*/
+@page {
+  size: A4 portrait;
+  margin: 16mm 14mm;
+}
 
 @media print {
-  .app-side, .app-top, .no-print, button, .app-banner { display: none !important; }
+  /* 1. 全局：白底黑字与字号（黑白打印可读性优先） */
+  html, body {
+    background: #fff !important;
+    color: #000 !important;
+    font-size: 10.5pt;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
   .app { display: block; }
   .app-main { padding: 0; }
   .app-main > .page { max-width: none; }
 
-  body { background: #fff; color: #000; font-size: 11pt; }
+  /* 2. 隐藏一切交互与导航（侧栏/顶栏/全局搜索/Tab/按钮/导出中心/降级黄条） */
+  .app-side,
+  .app-nav,
+  .app-top,
+  .shell-search,
+  .app-banner,
+  .tabs,
+  .actions,
+  .view-export,
+  .view-search .search-box,
+  button,
+  input[type="file"],
+  .no-print {
+    display: none !important;
+  }
 
-  /* 表格不跨页断行 */
-  tr, .card, .print-block { page-break-inside: avoid; }
+  /* 2b. 携带用户数据的表单控件（清单状态/备注）不隐藏，去壳为纯文本 */
+  select,
+  input[type="text"],
+  input[type="search"],
+  input[type="number"],
+  input[type="date"],
+  textarea {
+    appearance: none;
+    -webkit-appearance: none;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    color: #000 !important;
+    font-size: 9.5pt;
+  }
+
+  /* 3. 卡片与区块：不拦腰截断，边框改实线（黑白可辨） */
+  .card,
+  .advice-item,
+  .reason-card,
+  .advice-tier,
+  .export-item {
+    border: 1px solid #bbb !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: 8pt;
+  }
+  .card > h2, .card > h3 { font-size: 13pt; margin: 0 0 6pt; }
+
+  /* 4. 表格：跨页表头重复、合计行跟随表尾、行不截断 */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
   thead { display: table-header-group; }
+  tfoot { display: table-footer-group; }
+  tr, th, td { break-inside: avoid; page-break-inside: avoid; }
+  th, td {
+    border: 1px solid #999 !important;
+    padding: 3pt 5pt;
+    font-size: 9.5pt;
+  }
+  th { background: #eee !important; }
 
-  /* 打印时链接显示 URL */
-  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 9pt; color: #555; }
+  /* 5. 图形容器整块不跨页（甘特图/效果图/流程图） */
+  .gantt,
+  .gantt-row,
+  .scheme-figure,
+  .scheme-img,
+  .flow-figure,
+  .flow-view,
+  .timeline,
+  .step-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    max-width: 100%;
+  }
+  .scheme-img { max-height: 90vh; object-fit: contain; }
 
-  .print-title { font-size: 16pt; font-weight: 600; margin-bottom: 6mm; }
-  .print-meta { font-size: 9pt; color: #555; margin-bottom: 8mm; }
+  /* 6. 主动分页锚点（与导出 HTML 的 .page-break 口径一致） */
+  .page-break,
+  .pre-estimate-break {
+    break-after: page;
+    page-break-after: always;
+  }
 
-  /* 投资估算页（G11：A4 打印适配，合计行不跨页断行） */
-  .view-estimate .card { break-inside: avoid; }
-  .view-estimate table { width: 100%; border-collapse: collapse; }
-  .view-estimate th, .view-estimate td { border: 1px solid #999; padding: 4px 6px; font-size: 10.5pt; }
-  .view-estimate thead { display: table-header-group; }
-  .view-estimate tfoot { display: table-footer-group; }
+  /* 7. 链接黑白打印可读：去色去下划线 */
+  a { color: #000 !important; text-decoration: none !important; }
+
+  /* 8. 提示类文字保持可读 */
+  .notice { color: #333 !important; font-size: 9pt; }
 }
