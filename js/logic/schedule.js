@@ -136,8 +136,9 @@
     });
   }
 
-  // 关键路径：总时差为 0 的项按最早开始排序成链
+  // 关键路径：总时差为 0 的项按最早开始排序成链（空清单返回空链，不崩溃）
   function criticalPath(list, startDate) {
+    if (!list || !list.length) return { chain: [], items: [] };
     var fwd = forward(list, startDate);
     var bwd = backward(list, maxEft(fwd));
     var bmap = {};
@@ -160,6 +161,11 @@
   function buildSchedule(list, opts) {
     opts = opts || {};
     var ordered = list.slice().sort(function (a, b) { return a.no < b.no ? -1 : a.no > b.no ? 1 : 0; });
+    // 空清单守卫：返回空结构，不崩溃
+    if (!ordered.length) {
+      var anchor = opts.mode === 'backward' ? (opts.targetEndDate || '') : (opts.startDate || '');
+      return { mode: opts.mode === 'backward' ? 'backward' : 'forward', rows: [], range: { start: anchor, end: anchor }, totalDays: 0 };
+    }
     if (opts.mode === 'backward') {
       var bwd = backward(ordered, opts.targetEndDate);
       var bmap = {};

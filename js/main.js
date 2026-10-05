@@ -17,7 +17,8 @@
     'views.ui', 'views.shell', 'views.v-projects', 'views.v-library', 'views.v-detail',
     'views.v-checklist', 'views.v-templates', 'views.v-templates-custom',
     'logic.materials', 'views.v-materials',
-    'logic.tender', 'views.v-tender'
+    'logic.tender', 'views.v-tender',
+    'views.gantt', 'logic.schedule', 'views.vSchedule'
   ];
 
   function checkModules() {
@@ -108,7 +109,8 @@
       checklist: function (p) { return S.views['v-checklist'].render(p); },
       templates: function (p) { return S.views['v-templates'].render(p); },
       materials: function (p) { return S.views['v-materials'].render(p); },
-      tender:    function () { return S.views['v-tender'].render(); }
+      tender:    function () { return S.views['v-tender'].render(); },
+      schedule:  function (params) { return S.views.vSchedule.render(params); }
     };
 
     S.core.idb.createBestStore().then(function (store) {

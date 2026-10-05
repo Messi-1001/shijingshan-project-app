@@ -87,3 +87,19 @@ test('daysBetween 纯日期差', () => {
   assert.equal(s.daysBetween('2026-10-01', '2026-10-09'), 8);
   assert.equal(s.daysBetween('2026-10-01', '2026-10-01'), 0);
 });
+
+// 空清单守卫：不崩溃，返回空结构
+test('buildSchedule 空清单返回空 rows 与零总天数', () => {
+  const f = s.buildSchedule([], { mode: 'forward', startDate: '2026-10-01' });
+  assert.deepEqual(f.rows, []);
+  assert.equal(f.totalDays, 0);
+  const b = s.buildSchedule([], { mode: 'backward', targetEndDate: '2026-12-31' });
+  assert.deepEqual(b.rows, []);
+  assert.equal(b.totalDays, 0);
+});
+
+test('criticalPath 空清单返回空链', () => {
+  const cp = s.criticalPath([], '2026-10-01');
+  assert.deepEqual(cp.chain, []);
+  assert.deepEqual(cp.items, []);
+});
