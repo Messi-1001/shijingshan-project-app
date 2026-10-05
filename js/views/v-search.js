@@ -55,7 +55,16 @@
         return;
       }
 
-      var data = Object.assign({}, window.SJSQ.data, customRows ? { customTemplates: customRows } : null);
+      // 数据装配与 search.defaultData 同构：SJSQ.data 只有静态数据（平台/退回原因），
+      // 手续/模板索引在 boot 后挂于 app.procedures / app.templates，必须一并带入，
+      // 否则浏览器里「手续 / 模板」两类永远检索不到（阶段六实机验收发现）。
+      var d = window.SJSQ.data || {};
+      var a = window.SJSQ.app || {};
+      var data = Object.assign({},
+        d,
+        a.procedures ? { proceduresIndex: a.procedures } : null,
+        a.templates ? { templatesIndex: a.templates } : null,
+        customRows ? { customTemplates: customRows } : null);
       var r = search.search(query, { index: search.buildSearchIndex(data) });
       var summary = search.SOURCES.map(function (k) {
         return search.KIND_LABEL[k] + ' ' + (r.byKind[k] || 0);
