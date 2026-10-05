@@ -48,6 +48,15 @@
     }));
     var t = dom.h('table', { class: 'ui-table' }, [head, body]);
 
+    // opts.foot：合计行二维数组，渲染进 <tfoot>，不与明细混排（打印时合计不落数据区）
+    if (opts.foot && opts.foot.length) {
+      t.appendChild(dom.h('tfoot', {}, opts.foot.map(function (r) {
+        return dom.h('tr', {}, r.map(function (cell) {
+          return dom.h('td', {}, cell === null || cell === undefined ? '' : cell);
+        }));
+      })));
+    }
+
     if (!rows || !rows.length) {
       return dom.h('div', { class: 'ui-table-wrap' }, [t, empty(opts.empty || '暂无数据')]);
     }
