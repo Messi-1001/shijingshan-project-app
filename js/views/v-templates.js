@@ -10,7 +10,8 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function (root) {
   'use strict';
 
-  var CATEGORY_ORDER = ['土地手续', '规划手续', '发改委手续', '各类评价', '联合验收'];
+  // 前 5 类为存量模板分类；后 3 类供自定义模板使用（④⑤ 空缺后补，spec 11.2）
+  var CATEGORY_ORDER = ['土地手续', '规划手续', '发改委手续', '各类评价', '联合验收', '招标与合同', '施工许可', '其他'];
 
   function groupByCategory(list) {
     if (!list || !list.length) return [];
@@ -19,17 +20,30 @@
     }).filter(function (g) { return g.items.length > 0; });
   }
 
+  // 自定义模板不走 data.search（那里只认存量索引），用同一套字段规则过滤
+  function searchCustom(list, kw) {
+    var k = String(kw || '').trim().toLowerCase();
+    if (!k) return (list || []).slice();
+    return (list || []).filter(function (t) {
+      return [t.fileName, t.category, t.type, t.dir].join(' ').toLowerCase().indexOf(k) >= 0;
+    });
+  }
+
   function render(params) {
     var dom = root.SJSQ.core.dom;
     var ui = root.SJSQ.views.ui;
     var data = root.SJSQ.data.templates;
     var exp = root.SJSQ.logic.exporters;
+    var ctMod = root.SJSQ.views['v-templates-custom'];
+    var store = (root.SJSQ.app && root.SJSQ.app.store) || null;
+    var customList = [];
     var keyword = (params && params.sub) || '';
 
+    var desc = dom.h('p', { text: '存量模板 ' + data.allIds().length + ' 个。「可复用」= 空白模板 / 范本 / 请示函，支持一键复制与导出 Word；「参考」= 已填样例 / 批复 / 成果文件，仅供查看对照。' });
     var page = dom.h('div', { class: 'page' }, [
       dom.h('div', { class: 'page__head' }, [
         dom.h('h1', { text: '申请资料模板库' }),
-        dom.h('p', { text: '存量模板 ' + data.allIds().length + ' 个。「可复用」= 空白模板 / 范本 / 请示函，支持一键复制与导出 Word；「参考」= 已填样例 / 批复 / 成果文件，仅供查看对照。' })
+        desc
       ])
     ]);
 
@@ -41,7 +55,12 @@
 
     function paint(kw) {
       dom.clear(body);
-      var list = data.search(kw);
+      desc.textContent = '存量模板 ' + data.allIds().length + ' 个' +
+        (customList.length ? '，自定义模板 ' + customList.length + ' 个' : '') +
+        '。「可复用」= 空白模板 / 范本 / 请示函，支持一键复制与导出 Word；「参考」= 已填样例 / 批复 / 成果文件，仅供查看对照。';
+      var list = ctMod
+        ? ctMod.mergeCustom(data.search(kw), searchCustom(customList, kw))
+        : data.search(kw);
       var groups = groupByCategory(list);
 
       if (!groups.length) {
@@ -93,11 +112,25 @@
 
     var deb = root.SJSQ.core.util.debounce(function () { paint(input.value); }, 120);
     input.addEventListener('input', deb);
-    page.appendChild(dom.h('div', { class: 'page__actions' }, [input]));
+
+    // 自定义模板：进页面异步带出（store meta 表），有「＋ 新增模板」入口（Task 38）
+    if (ctMod && store) {
+      ctMod.loadCustom(store).then(function (rows) {
+        customList = rows || [];
+        paint(input.value);
+      });
+    }
+    var addBtn = ctMod ? ui.button('＋ 新增模板', { tone: 'primary', onClick: function () {
+      ctMod.openAddDialog(
+        root.SJSQ.app.store, root.SJSQ.app.procedures, function () { location.reload(); }
+      );
+    }}) : null;
+
+    page.appendChild(dom.h('div', { class: 'page__actions' }, [input, addBtn]));
     page.appendChild(body);
     paint(keyword);
     return page;
   }
 
-  return { CATEGORY_ORDER: CATEGORY_ORDER, groupByCategory: groupByCategory, render: render };
+  return { CATEGORY_ORDER: CATEGORY_ORDER, groupByCategory: groupByCategory, searchCustom: searchCustom, render: render };
 });

@@ -15,7 +15,7 @@
     'data.conditions', 'logic.filter', 'logic.progress', 'logic.exporters',
     'logic.renderTemplate',
     'views.ui', 'views.shell', 'views.v-projects', 'views.v-library', 'views.v-detail',
-    'views.v-checklist', 'views.v-templates'
+    'views.v-checklist', 'views.v-templates', 'views.v-templates-custom'
   ];
 
   function checkModules() {
