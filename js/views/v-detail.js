@@ -50,6 +50,27 @@
     return { proc: proc, prevProcs: prevProcs, nextProcs: nextProcs, hint: hint, missingTemplateIds: missingTemplateIds };
   }
 
+  /** 详情页的模板区块模型（Task 35） */
+  function buildTemplateSection(procedure, templatesData) {
+    var t = templatesData || (function () {
+      if (root && root.SJSQ && root.SJSQ.data && root.SJSQ.data.templates) return root.SJSQ.data.templates;
+      if (typeof module !== 'undefined' && module.exports) return require('../data/templates.js');
+      return null;
+    })();
+    if (!t || !procedure) return { items: [], filledDemo: '' };
+
+    var items = t.byProcedure(procedure.id).map(function (x) {
+      return { id: x.id, fileName: x.fileName, type: x.type, editable: !!x.editable };
+    });
+
+    var rt = (root && root.SJSQ && root.SJSQ.logic && root.SJSQ.logic.renderTemplate)
+      ? root.SJSQ.logic.renderTemplate
+      : (typeof module !== 'undefined' && module.exports ? require('../logic/render-template.js') : null);
+
+    var demo = rt ? rt.renderText('项目名称：{{项目名称}}　建设单位：{{建设单位}}', {}, '') : '';
+    return { items: items, filledDemo: demo };
+  }
+
   function render(params) {
     var dom = root.SJSQ.core.dom;
     var ui = root.SJSQ.views.ui;
@@ -98,17 +119,21 @@
         }))
       : ui.empty(p.reserved ? '预留项，暂不展开材料清单' : '材料清单待补充')));
 
-    // 块 6 关联模板
-    page.appendChild(ui.card('⑥ 关联模板', (p.templates && p.templates.length)
-      ? dom.h('div', {}, [
-          dom.h('p', { text: m.missingTemplateIds.length
-            ? '以下 ' + m.missingTemplateIds.length + ' 个模板尚未挂接（模板库在阶段四建立）：'
-            : '可在模板库中打开：' }),
-          dom.h('ul', {}, p.templates.map(function (t) {
-            return dom.h('li', {}, [dom.h('a', { href: '#/templates', text: t })]);
-          }))
-        ])
-      : ui.empty('暂无关联模板')));
+    // 块 6 关联模板（Task 35：挂接模板库与复制入口）
+    var ts = buildTemplateSection(p);
+    page.appendChild(ui.card('⑥ 关联模板', ts.items.length
+      ? ui.table(['模板文件', '类型', '可复制', '操作'], ts.items.map(function (x) {
+          return [
+            x.fileName,
+            ui.tag(x.type, x.type === '可复用' ? 'done' : 'idle'),
+            x.editable ? ui.tag('可复制', 'info') : ui.tag('扫描件（需手工填写）', 'idle'),
+            root.SJSQ.views.ui.button('复制待填字段', {
+              disabled: !x.editable,
+              onClick: function () { root.SJSQ.logic.renderTemplate.copyToClipboard(x, root.SJSQ.views.ui); }
+            })
+          ];
+        }))
+      : ui.empty('本项暂无关联模板', '④ 招标与合同 / ⑤ 施工许可 的模板待补充')));
 
     // 块 7 常见退回原因（阶段六接入）
     page.appendChild(ui.card('⑦ 常见退回原因', ui.empty('退回原因库将在阶段六接入', '')));
@@ -128,5 +153,5 @@
     return page;
   }
 
-  return { buildDetailModel: buildDetailModel, render: render };
+  return { buildDetailModel: buildDetailModel, buildTemplateSection: buildTemplateSection, render: render };
 });
