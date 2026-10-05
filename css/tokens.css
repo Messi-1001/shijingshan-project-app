@@ -1,0 +1,55 @@
+/* css/tokens.css —— 设计令牌（浅色主题，唯一色彩来源） */
+:root {
+  /* 主色：沉稳政务蓝 */
+  --c-primary:        #1a4f8a;
+  --c-primary-strong: #143d6b;
+  --c-primary-soft:   #e8f0f9;
+  --c-primary-border: #b9cfe6;
+
+  /* 中性色 */
+  --c-bg:          #f5f7fa;
+  --c-surface:     #ffffff;
+  --c-surface-alt: #fafbfc;
+  --c-border:      #e2e6ec;
+  --c-border-strong:#c9d0d9;
+  --c-text:        #1f2328;
+  --c-text-sub:    #5b636e;
+  --c-text-mute:   #8b939e;
+
+  /* 语义色 */
+  --c-ok:      #1f7a3f;  --c-ok-bg:      #e9f5ee;  --c-ok-border:      #b6ddc5;
+  --c-warn:    #9a6600;  --c-warn-bg:    #fdf5e6;  --c-warn-border:    #eddaa8;
+  --c-danger:  #b3261e;  --c-danger-bg:  #fdecea;  --c-danger-border:  #f2c2be;
+  --c-info:    #1a4f8a;  --c-info-bg:    #e8f0f9;  --c-info-border:    #b9cfe6;
+  --c-idle:    #5b636e;  --c-idle-bg:    #eef0f3;  --c-idle-border:    #d6dae0;
+
+  /* 间距（4 的倍数） */
+  --s-1: 4px;  --s-2: 8px;  --s-3: 12px; --s-4: 16px;
+  --s-5: 20px; --s-6: 24px; --s-8: 32px; --s-10: 40px; --s-12: 48px;
+
+  /* 字号 */
+  --f-xs: 12px; --f-sm: 13px; --f-md: 14px; --f-lg: 16px;
+  --f-xl: 20px; --f-2xl: 24px; --f-3xl: 30px;
+
+  /* 行高 */
+  --lh-tight: 1.35; --lh-normal: 1.6; --lh-loose: 1.8;
+
+  /* 圆角 */
+  --r-sm: 4px; --r-md: 6px; --r-lg: 10px; --r-pill: 999px;
+
+  /* 阴影 */
+  --sh-1: 0 1px 2px rgba(0,0,0,.06);
+  --sh-2: 0 2px 8px rgba(0,0,0,.08);
+  --sh-3: 0 8px 24px rgba(0,0,0,.12);
+
+  /* 其他 */
+  --sidebar-w: 232px;
+  --topbar-h: 56px;
+  --dur: .16s;
+
+  /* 字体栈：全系统字体，不加载 Web 字体（离线要求 G2） */
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+          "Hiragino Sans GB", "Microsoft YaHei", "Source Han Sans SC",
+          "Noto Sans CJK SC", sans-serif;
+  --font-mono: "Cascadia Mono", Consolas, "Courier New", monospace;
+}

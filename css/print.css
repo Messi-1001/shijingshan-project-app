@@ -1,0 +1,21 @@
+/* css/print.css —— A4 打印（G11） */
+@page { size: A4; margin: 14mm; }
+
+@media print {
+  .app-side, .app-top, .no-print, button, .app-banner { display: none !important; }
+  .app { display: block; }
+  .app-main { padding: 0; }
+  .app-main > .page { max-width: none; }
+
+  body { background: #fff; color: #000; font-size: 11pt; }
+
+  /* 表格不跨页断行 */
+  tr, .card, .print-block { page-break-inside: avoid; }
+  thead { display: table-header-group; }
+
+  /* 打印时链接显示 URL */
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 9pt; color: #555; }
+
+  .print-title { font-size: 16pt; font-weight: 600; margin-bottom: 6mm; }
+  .print-meta { font-size: 9pt; color: #555; margin-bottom: 8mm; }
+}

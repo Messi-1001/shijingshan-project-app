@@ -1,0 +1,42 @@
+/* css/base.css —— reset 与排版 */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body { margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font);
+  font-size: var(--f-md);
+  line-height: var(--lh-normal);
+  color: var(--c-text);
+  background: var(--c-bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 { margin: 0 0 var(--s-3); line-height: var(--lh-tight); font-weight: 600; }
+h1 { font-size: var(--f-2xl); }
+h2 { font-size: var(--f-xl); }
+h3 { font-size: var(--f-lg); }
+h4 { font-size: var(--f-md); }
+p  { margin: 0 0 var(--s-3); }
+
+a { color: var(--c-primary); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+ul, ol { margin: 0 0 var(--s-3); padding-left: var(--s-5); }
+
+table { border-collapse: collapse; width: 100%; }
+
+button, input, select, textarea { font: inherit; color: inherit; }
+
+/* 可达性：键盘焦点必须可见（G13） */
+:focus-visible { outline: 2px solid var(--c-primary); outline-offset: 2px; }
+
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+/* 全局滚动条（浅色） */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: var(--c-border-strong); border-radius: var(--r-pill); }
+::-webkit-scrollbar-track { background: transparent; }
