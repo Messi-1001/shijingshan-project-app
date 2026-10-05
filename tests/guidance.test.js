@@ -5,8 +5,8 @@ const H = require('./_helpers.js');
 const guidance = H.req('js/data/guidance.js');
 const schema = H.req('js/data/schema.js');
 
-test('EXCLUDED：6 条排除口径，每条都有 name 与 reason', () => {
-  assert.equal(guidance.EXCLUDED.length, 6);
+test('EXCLUDED：5 条排除口径，每条都有 name 与 reason', () => {
+  assert.equal(guidance.EXCLUDED.length, 5);
   const names = guidance.EXCLUDED.map((e) => e.name);
   assert.ok(names.includes('建设用地规划许可证'));
   assert.ok(names.includes('办理产权证'));
@@ -17,6 +17,11 @@ test('EXCLUDED：6 条排除口径，每条都有 name 与 reason', () => {
     assert.equal(typeof e.reason, 'string');
     assert.ok(e.reason.length > 0);
   });
+});
+
+test('全库排出口径：「项目储备入库」不写不列，任何用户可见文本均不出现', () => {
+  // spec 第 4 节 ①（用户 2026-09-25 冻结）：不进流程——不写、不列、不作为前置步骤
+  assert.equal(JSON.stringify(guidance).includes('项目储备入库'), false);
 });
 
 test('EVALUATION_HINTS：pj-1..pj-8 全覆盖，pj-6..pj-8 为预留', () => {
