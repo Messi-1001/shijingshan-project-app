@@ -30,6 +30,13 @@ test('defaultInput 默认工程费用为正数', () => {
   assert.ok(d.工程费用 > 0);
 });
 
+test('exportFileName 导出文件名含日期后缀（YYYY-MM-DD）', () => {
+  const n = ve.exportFileName('验证学校D', new Date(2026, 9, 5));
+  assert.equal(n, '验证学校D-投资估算表-2026-10-05.doc');
+  const noName = ve.exportFileName('', new Date(2026, 9, 5));
+  assert.match(noName, /^项目-投资估算表-\d{4}-\d{2}-\d{2}\.doc$/, '缺项目名时回退「项目」且必含日期');
+});
+
 test('buildRows 含两页与合计行', () => {
   const r = ve.buildRows({ 工程费用: 20000 });
   assert.ok(r.page1.rows.length > 0);

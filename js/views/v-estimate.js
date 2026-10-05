@@ -1,15 +1,23 @@
 /* js/views/v-estimate.js —— 页面 8：投资估算（两页纸明细 + 汇总 + 免责说明 + Word 导出） */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) {
-    module.exports = factory(require('../logic/estimate.js'), require('../core/util.js'));
+    module.exports = factory(require('../logic/estimate.js'), require('../core/util.js'), require('../logic/exporters.js'));
   } else {
     root.SJSQ = root.SJSQ || {}; root.SJSQ.views = root.SJSQ.views || {};
-    root.SJSQ.views.vEstimate = factory(root.SJSQ.logic.estimate, root.SJSQ.core.util);
+    root.SJSQ.views.vEstimate = factory(root.SJSQ.logic.estimate, root.SJSQ.core.util, root.SJSQ.logic.exporters);
   }
-})(typeof self !== 'undefined' ? self : this, function (estimate, util) {
+})(typeof self !== 'undefined' ? self : this, function (estimate, util, exporters) {
   'use strict';
 
   function defaultInput() { return { 工程费用: 20000, projectName: '' }; }
+
+  // 纯函数（Node 可测）：导出文件名 = 项目名-投资估算表-YYYY-MM-DD.doc
+  function exportFileName(projectName, now) {
+    return exporters.docFileName(
+      (projectName || '项目') + '-投资估算表',
+      util.formatDate(now || new Date())
+    );
+  }
 
   // 纯函数（Node 可测）：转发 estimate.buildTwopage，第二页补基本预备费行并加合计
   function buildRows(est) {
@@ -75,7 +83,7 @@
       body.appendChild(h('div', { class: 'actions' }, [
         ui.button('导出为 Word（两页纸）', { tone: 'primary', onClick: function () {
           var html = exporters.buildEstimateDoc(r, state.input.projectName || '未命名项目');
-          exporters.downloadDoc(html, exporters.docFileName((state.input.projectName || '项目') + '-投资估算表'));
+          exporters.downloadDoc(html, exportFileName(state.input.projectName, new Date()));
         } }),
         ui.button('打印', { onClick: function () { window.print(); } }),
       ]));
@@ -92,5 +100,5 @@
     return wrap;
   }
 
-  return { defaultInput: defaultInput, buildRows: buildRows, render: render };
+  return { defaultInput: defaultInput, buildRows: buildRows, exportFileName: exportFileName, render: render };
 });
