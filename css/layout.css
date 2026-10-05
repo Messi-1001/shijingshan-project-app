@@ -101,3 +101,13 @@
 .cl-dropped { margin: var(--s-4) 0; padding: var(--s-3); background: var(--c-warn-bg);
   border: 1px solid var(--c-warn-border); border-radius: var(--r-md); color: var(--c-warn); font-size: var(--f-sm); }
 .cl-dropped summary { cursor: pointer; }
+
+/* 清单页看板：各板块完成率（Task 30） */
+.board { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: var(--s-3); }
+.board__name { font-size: var(--f-sm); margin-bottom: var(--s-1); }
+.board__bar { height: 8px; background: var(--c-border); border-radius: var(--r-pill); overflow: hidden; }
+.board__fill { height: 100%; border-radius: var(--r-pill); }
+.board__fill--idle  { background: var(--c-border-strong); }
+.board__fill--doing { background: var(--c-warn); }
+.board__fill--done  { background: var(--c-ok); }
+.board__num { font-size: var(--f-xs); color: var(--c-text-mute); margin-top: var(--s-1); }

@@ -106,6 +106,23 @@
     };
   }
 
+  /** 看板：七个板块的完成率分项（只统计指定项目） */
+  function buildBoard(list, checklist, projectId) {
+    var prog = L('progress');
+    var mine = remap(checklist, projectId);
+    var sch = (root && root.SJSQ && root.SJSQ.data && root.SJSQ.data.schema)
+      ? root.SJSQ.data.schema
+      : (typeof module !== 'undefined' && module.exports ? require('../data/schema.js') : null);
+
+    return sch.SECTION_ORDER.map(function (key) {
+      var items = (list || []).filter(function (p) { return p.section === key; });
+      var done = items.filter(function (p) { return prog.statusOf(mine, p.id) === 'done'; }).length;
+      var percent = items.length ? Math.round((done / items.length) * 100) : 0;
+      var tone = percent === 0 ? 'idle' : (percent === 100 ? 'done' : 'doing');
+      return { section: key, name: sch.SECTIONS[key].name, total: items.length, done: done, percent: percent, tone: tone };
+    }).filter(function (x) { return x.total > 0; });
+  }
+
   function render(params) {
     var dom = root.SJSQ.core.dom;
     var ui = root.SJSQ.views.ui;
@@ -163,6 +180,17 @@
             ]) : dom.h('div', { class: 'cl-next' }, ['全部手续已办结 🎉'])
           ])
         ])));
+
+        headSlot.appendChild(ui.card('各板块完成率', dom.h('div', { class: 'board' },
+          buildBoard(list, checklist, projectId).map(function (b) {
+            return dom.h('div', { class: 'board__item' }, [
+              dom.h('div', { class: 'board__name', text: b.name }),
+              dom.h('div', { class: 'board__bar' }, [
+                dom.h('div', { class: 'board__fill board__fill--' + b.tone, style: 'width:' + b.percent + '%' })
+              ]),
+              dom.h('div', { class: 'board__num', text: b.done + '/' + b.total + '（' + b.percent + '%）' })
+            ]);
+          }))));
 
         // 分板块表格
         dom.clear(bodySlot);
@@ -316,6 +344,6 @@
 
   return {
     buildRows: buildRows, remap: remap, checklistRowId: checklistRowId,
-    buildSafetyNet: buildSafetyNet, render: render
+    buildSafetyNet: buildSafetyNet, buildBoard: buildBoard, render: render
   };
 });
