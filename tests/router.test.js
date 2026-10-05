@@ -27,6 +27,16 @@ test('parseHash 路径段与查询串可同时出现', () => {
     { name: 'detail', params: { id: '34', tab: 'materials' } });
 });
 
+test('parseHash 路径段非法百分号编码不抛错（M3）', () => {
+  // decodeURIComponent('%zz') 会抛 URIError，路径段必须按原值兜底
+  const r1 = router.parseHash('#/detail/%zz');
+  assert.equal(r1.name, 'detail');
+  assert.equal(r1.params.id, '%zz');
+  const r2 = router.parseHash('#/detail/%zz/%qq');
+  assert.equal(r2.params.id, '%zz');
+  assert.equal(r2.params.sub, '%qq');
+});
+
 test('buildHash 拼接', () => {
   assert.equal(router.buildHash('library'), '#/library');
   assert.equal(router.buildHash('detail', { id: '34' }), '#/detail/34');

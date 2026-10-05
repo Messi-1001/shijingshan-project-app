@@ -77,6 +77,14 @@
     return form;
   }
 
+  // 存储操作统一兜底：console.error + alert 降级提示（阶段二各视图沿用此模式）
+  function onStoreError(err) {
+    console.error('[v-projects] 存储操作失败：', err);
+    if (typeof root.alert === 'function') {
+      root.alert('存储操作失败，请重试；若反复出现，请检查浏览器是否禁用了站点数据。');
+    }
+  }
+
   function render() {
     var dom = root.SJSQ.core.dom;
     var ui = root.SJSQ.views.ui;
@@ -125,7 +133,7 @@
                           root.SJSQ.app.state.set({ currentId: null });
                         }
                         refresh();
-                      });
+                      }).catch(onStoreError);
                     }
                   }).open();
                 }})
@@ -134,7 +142,7 @@
           }),
           { empty: '' }
         ));
-      });
+      }).catch(onStoreError);
     }
 
     function openForm(existing) {
@@ -145,7 +153,12 @@
         confirmText: '保存',
         onConfirm: function () {
           var values = readForm(form);
-          var obj = createProjectObject(Object.assign({ id: existing && existing.id }, values));
+          // 编辑路径必须透传 existing.createdAt，否则 createProjectObject 会当成新建、
+          // 用当前时间覆盖创建日期（M2）
+          var obj = createProjectObject(Object.assign(
+            { id: existing && existing.id, createdAt: existing && existing.createdAt },
+            values
+          ));
           var errs = validateProject(obj);
           if (errs.length) {
             var box = form.querySelector('.form-errors');
@@ -159,7 +172,7 @@
           store.put('projects', obj).then(function () {
             refresh();
             if (!existing) root.SJSQ.app.state.set({ currentId: obj.id });
-          });
+          }).catch(onStoreError);
           return true;
         }
       });

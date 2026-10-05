@@ -4,7 +4,8 @@
 
   var S = window.SJSQ;
   var REQUIRED = [
-    'core.ns', 'core.util', 'core.dom', 'core.store', 'core.idb', 'core.router'
+    'core.ns', 'core.util', 'core.dom', 'core.store', 'core.idb', 'core.router',
+    'core.state', 'views.ui', 'views.shell', 'views.v-projects'
   ];
 
   function checkModules() {
@@ -22,6 +23,20 @@
     return true;
   }
 
+  // 从存量 id 里提取序号段最大值（兼容旧格式 proj-3 与新格式 proj-3-x1y2z），
+  // boot 时用它回置 util 的 uid 计数器，避免刷新后序号从 1 重来（C1 双保险之二）。
+  function maxSeqOf(rows) {
+    var max = 0;
+    (rows || []).forEach(function (row) {
+      var m = /-(\d+)/.exec(String((row && row.id) || ''));
+      if (m) {
+        var n = parseInt(m[1], 10);
+        if (n > max) max = n;
+      }
+    });
+    return max;
+  }
+
   function boot() {
     if (!checkModules()) return;
 
@@ -35,6 +50,20 @@
     S.app.state = S.core.state.createState();
 
     S.core.idb.createBestStore().then(function (store) {
+      // 先扫存量 id 回置 uid 计数器，再进壳层——保证首个新建项目的 uid 不与旧数据撞
+      return Promise.all([
+        store.list('projects').catch(function () { return []; }),
+        store.list('checklist').catch(function () { return []; })
+      ]).then(function (lists) {
+        var maxSeq = 0;
+        lists.forEach(function (rows) {
+          var n = maxSeqOf(rows);
+          if (n > maxSeq) maxSeq = n;
+        });
+        if (maxSeq > 0) S.core.util.seedSeq(maxSeq);
+        return store;
+      });
+    }).then(function (store) {
       var shell = S.views.shell.createShell({
         store: store,
         storeInfo: { reason: store.reason || '' },

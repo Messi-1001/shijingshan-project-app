@@ -66,7 +66,19 @@
 
   function uid(prefix) {
     _seq += 1;
-    return String(prefix) + '-' + _seq;
+    // 时间熵 + 随机段：模块级 _seq 会随页面刷新重置，光靠序号跨会话必撞，
+    // 后缀保证不同会话生成的 id 也不会重叠（store.put 按主键覆盖，撞 id = 吞数据）
+    var t = Date.now().toString(36);
+    var r = Math.random().toString(36).slice(2, 8) || '0';
+    return String(prefix) + '-' + _seq + '-' + t + r;
+  }
+
+  // 把计数器回置到不小于 n：boot 时用存量 id 里的最大序号调用，
+  // 防止刷新后新 uid 的序号段与旧数据重叠（时间熵之外的第二道保险）
+  function seedSeq(n) {
+    var v = parseInt(n, 10);
+    if (!isNaN(v) && v > _seq) _seq = v;
+    return _seq;
   }
 
   function groupBy(arr, key) {
@@ -86,7 +98,7 @@
 
   return {
     pad2: pad2, formatDate: formatDate, formatMoney: formatMoney, parseNum: parseNum,
-    sortZh: sortZh, deepClone: deepClone, debounce: debounce, uid: uid,
+    sortZh: sortZh, deepClone: deepClone, debounce: debounce, uid: uid, seedSeq: seedSeq,
     groupBy: groupBy, percent: percent
   };
 });

@@ -45,11 +45,32 @@ test('deepClone 深拷贝', () => {
   assert.equal(a.x[1].y, 2);
 });
 
-test('uid 递增且带前缀', () => {
+test('uid 递增且带前缀与时间熵后缀', () => {
   const a = u.uid('p');
   const b = u.uid('p');
-  assert.match(a, /^p-\d+$/);
+  assert.match(a, /^p-\d+-[a-z0-9]+$/);
   assert.notEqual(a, b);
+});
+
+test('uid 同前缀连发 1000 个无重复', () => {
+  const seen = new Set();
+  for (let i = 0; i < 1000; i++) seen.add(u.uid('proj'));
+  assert.equal(seen.size, 1000);
+});
+
+test('seedSeq 回置计数器后新 uid 不与已注入 id 冲突', () => {
+  // 模拟跨会话：库里已有旧格式 proj-7 与新格式 proj-9-x1y2z
+  const existing = ['proj-7', 'proj-9-x1y2z'];
+  u.seedSeq(9);
+  for (let i = 0; i < 100; i++) {
+    const id = u.uid('proj');
+    // 序号段必须大于已注入的最大序号
+    const seq = parseInt(/-(\d+)-/.exec(id)[1], 10);
+    assert.ok(seq > 9, '序号段 ' + seq + ' 应大于 9');
+    assert.ok(!existing.includes(id));
+  }
+  // seedSeq 只增不减，小值不会把计数器拉低
+  assert.ok(u.seedSeq(1) >= 9);
 });
 
 test('groupBy 分组', () => {

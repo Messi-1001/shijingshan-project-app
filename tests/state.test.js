@@ -46,6 +46,18 @@ test('createProjectObject 带入四维固定默认值', () => {
   assert.ok(obj.id.length > 0);
 });
 
+test('编辑对象保留原 id 与 createdAt（M2）', () => {
+  const existing = vp.createProjectObject({ name: '旧名', unit: '旧单位' });
+  // 与 v-projects openForm 编辑路径同构：透传 existing 的 id/createdAt，表单值覆盖
+  const edited = vp.createProjectObject(Object.assign(
+    { id: existing.id, createdAt: existing.createdAt },
+    { name: '新名', unit: '新单位', address: '某路 1 号' }
+  ));
+  assert.equal(edited.id, existing.id);
+  assert.equal(edited.createdAt, existing.createdAt);
+  assert.equal(edited.name, '新名');
+});
+
 test('validateProject 必填校验', () => {
   const errs = vp.validateProject(vp.createProjectObject({}));
   assert.ok(errs.some((e) => e.includes('项目名称')));

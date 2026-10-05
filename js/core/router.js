@@ -12,6 +12,11 @@
 
   var PATH_KEYS = ['id', 'sub'];
 
+  // 非法百分号编码（如 %zz）时按原值使用，不让整页崩掉
+  function safeDecode(s) {
+    try { return decodeURIComponent(s); } catch (e) { return s; }
+  }
+
   function parseHash(hash) {
     var raw = String(hash || '').replace(/^#\/?/, '');
     if (!raw) return { name: '', params: {} };
@@ -36,8 +41,8 @@
     if (!parts.length) return { name: '', params: params };
 
     var name = parts[0];
-    if (parts[1]) params.id = decodeURIComponent(parts[1]);
-    if (parts[2]) params.sub = decodeURIComponent(parts[2]);
+    if (parts[1]) params.id = safeDecode(parts[1]);
+    if (parts[2]) params.sub = safeDecode(parts[2]);
     return { name: name, params: params };
   }
 
