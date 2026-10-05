@@ -11,10 +11,10 @@ test('groupByCategory 按固定顺序输出 5 组', () => {
     ['土地手续', '规划手续', '发改委手续', '各类评价', '联合验收']);
 });
 
-test('每组条数正确', () => {
+test('每组条数正确（联合验收 18：I-1 剔除身份证条目后）', () => {
   t.build();
   const g = v.groupByCategory(t.search(''));
-  assert.equal(g.find((x) => x.category === '联合验收').items.length, 19);
+  assert.equal(g.find((x) => x.category === '联合验收').items.length, 18);
 });
 
 test('空输入返回空数组', () => {

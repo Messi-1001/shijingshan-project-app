@@ -115,3 +115,17 @@
 /* 页面 5：申请资料模板库（Task 33） */
 .tpl-path { font-size: var(--f-xs); color: var(--c-text-mute); margin-top: 2px; }
 .tpl-actions { display: flex; gap: var(--s-2); flex-wrap: wrap; }
+
+/* 详情页 ⑥ 关联模板：「填入示例」小节（终审 I-2，浅色弱化样式） */
+.tpl-filled-demo {
+  margin-top: var(--s-3);
+  padding: var(--s-2) var(--s-3);
+  background: var(--c-bg, #f7f8fa);
+  border: 1px dashed var(--c-border);
+  border-radius: var(--r-md, 6px);
+}
+.tpl-filled-demo__title { font-size: var(--f-xs); color: var(--c-text-mute); margin-bottom: var(--s-1); }
+.tpl-filled-demo__text {
+  margin: 0; font-size: var(--f-sm); color: var(--c-text-mute);
+  font-family: inherit; white-space: pre-wrap;
+}

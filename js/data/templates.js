@@ -70,14 +70,20 @@
     var src = ensure().list;
     if (!kw) return src.slice();
     return src.filter(function (t) {
-      return [t.fileName, t.category, t.type, t.dir].join(' ').toLowerCase().indexOf(kw) >= 0;
+      return [t.label || '', t.fileName, t.category, t.type, t.dir].join(' ').toLowerCase().indexOf(kw) >= 0;
     });
+  }
+
+  // 终审 I-1：显示名统一走这里——有 label（通用化显示名）用 label，否则回退 fileName。
+  // UI 渲染与导出 meta 一律显示该值；fileName 仅用于打开文件的真实路径，不进用户可见文本。
+  function displayName(t) {
+    return (t && (t.label || t.fileName)) || '';
   }
 
   function validate() { return ensure().errors; }
 
   return {
     build: build, allIds: allIds, getById: getById, byProcedure: byProcedure,
-    getByPlaceholder: getByPlaceholder, search: search, validate: validate
+    getByPlaceholder: getByPlaceholder, search: search, displayName: displayName, validate: validate
   };
 });

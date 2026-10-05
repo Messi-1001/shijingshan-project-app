@@ -60,3 +60,28 @@ test('空输入不炸', () => {
   assert.deepEqual(m.mergeDuplicates([]), []);
   assert.deepEqual(m.groupByProvider([]), []);
 });
+
+// ── 终审 I-3：备料勾选（内存态，纯函数可测） ──
+
+test('toggleCheck 勾选/取消勾选均返回新对象且不改动入参', () => {
+  const map = {};
+  const on = m.toggleCheck(map, '营业执照副本');
+  assert.deepEqual(map, {}, '原对象不得被改动');
+  assert.deepEqual(on, { '营业执照副本': true });
+  const off = m.toggleCheck(on, '营业执照副本');
+  assert.deepEqual(off, {});
+  // 同名材料合并后按合并名勾选；不同材料互不影响
+  const merged = m.mergeDuplicates(m.collect(L));
+  let cur = {};
+  cur = m.toggleCheck(cur, merged[0].name);
+  cur = m.toggleCheck(cur, merged[1].name);
+  cur = m.toggleCheck(cur, merged[1].name);
+  assert.equal(m.countChecked(cur, merged), 1, '取消一个后剩 1 个已勾选');
+});
+
+test('countChecked 只统计当前行集内已勾选的条目', () => {
+  const rows = [{ name: 'A' }, { name: 'B' }];
+  assert.equal(m.countChecked({ A: true, C: true }, rows), 1, '不在行集里的勾选不计入');
+  assert.equal(m.countChecked(null, rows), 0);
+  assert.equal(m.countChecked({}, []), 0);
+});

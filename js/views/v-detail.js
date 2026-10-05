@@ -50,7 +50,7 @@
     return { proc: proc, prevProcs: prevProcs, nextProcs: nextProcs, hint: hint, missingTemplateIds: missingTemplateIds };
   }
 
-  /** 详情页的模板区块模型（Task 35） */
+  /** 详情页的模板区块模型（Task 35；终审 I-1/I-2：带 label 显示名与 filledDemo） */
   function buildTemplateSection(procedure, templatesData) {
     var t = templatesData || (function () {
       if (root && root.SJSQ && root.SJSQ.data && root.SJSQ.data.templates) return root.SJSQ.data.templates;
@@ -60,7 +60,11 @@
     if (!t || !procedure) return { items: [], filledDemo: '' };
 
     var items = t.byProcedure(procedure.id).map(function (x) {
-      return { id: x.id, fileName: x.fileName, type: x.type, editable: !!x.editable };
+      return {
+        id: x.id,
+        // fileName 仅用于打开文件路径；UI 显示一律走通用化名（终审 I-1）
+        fileName: x.fileName, label: x.label || '', type: x.type, editable: !!x.editable
+      };
     });
 
     var rt = (root && root.SJSQ && root.SJSQ.logic && root.SJSQ.logic.renderTemplate)
@@ -119,12 +123,14 @@
         }))
       : ui.empty(p.reserved ? '预留项，暂不展开材料清单' : '材料清单待补充')));
 
-    // 块 6 关联模板（Task 35：挂接模板库与复制入口）
+    // 块 6 关联模板（Task 35：挂接模板库与复制入口；终审 I-2：渲染「填入示例」小节）
     var ts = buildTemplateSection(p);
-    page.appendChild(ui.card('⑥ 关联模板', ts.items.length
-      ? ui.table(['模板文件', '类型', '可复制', '操作'], ts.items.map(function (x) {
+    var card6Body;
+    if (ts.items.length) {
+      card6Body = dom.h('div', {}, [
+        ui.table(['模板文件', '类型', '可复制', '操作'], ts.items.map(function (x) {
           return [
-            x.fileName,
+            x.label || x.fileName, // 终审 I-1：显示通用化名
             ui.tag(x.type, x.type === '可复用' ? 'done' : 'idle'),
             x.editable ? ui.tag('可复制', 'info') : ui.tag('扫描件（需手工填写）', 'idle'),
             root.SJSQ.views.ui.button('复制待填字段', {
@@ -132,8 +138,16 @@
               onClick: function () { root.SJSQ.logic.renderTemplate.copyToClipboard(x, root.SJSQ.views.ui); }
             })
           ];
-        }))
-      : ui.empty('本项暂无关联模板', '④ 招标与合同 / ⑤ 施工许可 的模板待补充')));
+        })),
+        dom.h('div', { class: 'tpl-filled-demo' }, [
+          dom.h('div', { class: 'tpl-filled-demo__title', text: '填入示例（复制或导出时按当前项目自动填入）' }),
+          dom.h('pre', { class: 'tpl-filled-demo__text', text: ts.filledDemo })
+        ])
+      ]);
+    } else {
+      card6Body = ui.empty('本项暂无关联模板', '④ 招标与合同 / ⑤ 施工许可 的模板待补充');
+    }
+    page.appendChild(ui.card('⑥ 关联模板', card6Body));
 
     // 块 7 常见退回原因（阶段六接入）
     page.appendChild(ui.card('⑦ 常见退回原因', ui.empty('退回原因库将在阶段六接入', '')));

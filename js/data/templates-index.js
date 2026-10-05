@@ -1,4 +1,4 @@
-/* js/data/templates-index.js —— 存量模板库索引（35 个文件） */
+/* js/data/templates-index.js —— 存量模板库索引（34 个文件） */
 (function (root, factory) {
   var mod = factory();
   if (typeof module !== 'undefined' && module.exports) { module.exports = mod; }
@@ -11,19 +11,23 @@
   'use strict';
 
   var DIR = '文件模板';
-  function T(id, fileName, dir, category, type, editable, procedureIds, placeholderId) {
-    return { id: id, fileName: fileName, dir: dir || DIR, category: category,
+  // label：通用化显示名（UI 与导出 meta 一律显示它）；fileName 只用于打开文件的真实路径，
+  // 不进任何用户可见文本（终审 I-1：真实项目名/人名脱敏，G15）。
+  function T(id, fileName, dir, category, type, editable, procedureIds, placeholderId, label) {
+    var o = { id: id, fileName: fileName, dir: dir || DIR, category: category,
       type: type, editable: !!editable, procedureIds: procedureIds || [], placeholderId: placeholderId || '' };
+    if (label) o.label = label;
+    return o;
   }
 
   var RAW = [
     // ── 土地手续（2） ─────────────────────────────
     T('tpl-tudi-qingshi', '土地的请示函模板.pdf', DIR, '土地手续', '可复用', true, ['yd-7'], 'TUDI_QINGSHI'),
-    T('tpl-huabo-jueding', '首钢东南区配套学校建设工程国有建设用地划拨决定书-京规自石划字〔2023〕25 号.pdf', DIR, '土地手续', '参考', false, ['yd-7']),
+    T('tpl-huabo-jueding', '首钢东南区配套学校建设工程国有建设用地划拨决定书-京规自石划字〔2023〕25 号.pdf', DIR, '土地手续', '参考', false, ['yd-7'], '', '国有建设用地划拨决定书（样例）'),
 
     // ── 规划手续（6） ─────────────────────────────
     T('tpl-duogui-tuisong', '规划综合实施方案多规合一平台推送情况说明书.pptx', DIR, '规划手续', '可复用', true, ['gh-1'], 'DUOGUI_TUISONG'),
-    T('tpl-duogui-chushen', '北京市规划和自然资源委员会石景山分局《关于首钢东南区配套学校建设工程项目“多规合一”协同平台初审意见的函》（京规自（石）初审函〔2023〕0003号）.pdf', DIR, '规划手续', '参考', false, ['gh-1']),
+    T('tpl-duogui-chushen', '北京市规划和自然资源委员会石景山分局《关于首钢东南区配套学校建设工程项目“多规合一”协同平台初审意见的函》（京规自（石）初审函〔2023〕0003号）.pdf', DIR, '规划手续', '参考', false, ['gh-1'], '', '多规合一初审意见函（样例）'),
     T('tpl-duogui-huishang', '会商批复-北京市规划和自然资源委员会石景山分局多规合一协同平台会商意见-2023规自（石）综审字0014号.pdf', DIR, '规划手续', '参考', false, ['gh-2']),
     T('tpl-guizheng-zhengwen', '规证正文-建字第 110107202400002 号2024规自（石）建字0002号.pdf', DIR, '规划手续', '参考', false, ['gh-3']),
     T('tpl-xiaofang-shencha', '特殊建设工程消防设计审査意见书--京规自（石）消审字[2024]第 0007 号7.29.pdf', DIR, '规划手续', '参考', false, ['gh-5']),
@@ -34,7 +38,7 @@
     T('tpl-gaisuan-qingshi', '发改委初审设计概算的请示函模版.pdf', DIR, '发改委手续', '可复用', true, ['lx-7'], 'GAISUAN_QINGSHI'),
     T('tpl-gaisuan-wenben', '初步设计概算的设计文本模版.pdf', DIR, '发改委手续', '可复用', true, ['lx-7'], 'GAISUAN_WENBEN'),
     T('tpl-gaisuan-moban', '初步设计概算模板.pdf', DIR, '发改委手续', '可复用', true, ['lx-7'], 'GAISUAN_MOBAN'),
-    T('tpl-xiangmu-jianyi-pifu', '关于首钢东南区配套学校建设工程项目建议书（代可行性研究报告）的批复--京发改（审）〔2023〕477号.pdf', DIR, '发改委手续', '参考', false, ['lx-5', 'lx-6']),
+    T('tpl-xiangmu-jianyi-pifu', '关于首钢东南区配套学校建设工程项目建议书（代可行性研究报告）的批复--京发改（审）〔2023〕477号.pdf', DIR, '发改委手续', '参考', false, ['lx-5', 'lx-6'], '', '项目建议书批复（样例）'),
     T('tpl-gaisuan-pifu', '初步设计概算批复-京发改（审）〔2024〕224号.pdf', DIR, '发改委手续', '参考', false, ['lx-7']),
 
     // ── 各类评价（2） ─────────────────────────────
@@ -44,7 +48,7 @@
     // ── 联合验收（19） ────────────────────────────
     T('tpl-guihua-heshi-shenbao', '1事项申报表.pdf', DIR + '/联合验收资料模板/1规划验收申报资料', '联合验收', '可复用', true, ['jg-4'], 'HESHI_SHENBAO'),
     T('tpl-faren-shouquan', '2.1法人授权委托书.pdf', DIR + '/联合验收资料模板/1规划验收申报资料', '联合验收', '可复用', true, ['jg-4'], 'FAREN_SHOUQUAN'),
-    T('tpl-shenfen-fujian', '2.2邓斌身份证复印件-不盖章版.pdf', DIR + '/联合验收资料模板/1规划验收申报资料', '联合验收', '参考', false, ['jg-4'], ''),
+    // 终审 I-1（G15 红线）：身份证复印件属明令禁入素材，整条剔除（即使改名也不进索引）
     T('tpl-jungong-celiang', '3竣工测量成果文件202602021终.pdf', DIR + '/联合验收资料模板/1规划验收申报资料', '联合验收', '参考', false, ['jg-4']),
     T('tpl-junguitu', '4竣规图.pdf', DIR + '/联合验收资料模板/1规划验收申报资料', '联合验收', '参考', false, ['jg-4']),
     T('tpl-heshi-han', '5.1申请核验的函.pdf', DIR + '/联合验收资料模板/1规划验收申报资料', '联合验收', '可复用', true, ['jg-4'], 'HESHI_HAN'),

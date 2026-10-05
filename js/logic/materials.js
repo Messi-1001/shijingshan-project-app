@@ -92,8 +92,23 @@
     };
   }
 
+  // ── 备料勾选（终审 I-3，内存态不持久化）──
+  // checkedMap: { [材料名]: true }。返回新对象，不改动入参（纯函数，Node 可测）。
+  function toggleCheck(checkedMap, name) {
+    var out = Object.assign({}, checkedMap || {});
+    if (out[name]) delete out[name]; else out[name] = true;
+    return out;
+  }
+
+  // 已勾选且在当前行集里出现的材料数（配合「已勾选 N / 共 M」小计）
+  function countChecked(checkedMap, rows) {
+    var map = checkedMap || {};
+    return (rows || []).filter(function (r) { return map[r.name]; }).length;
+  }
+
   return {
     collect: collect, mergeDuplicates: mergeDuplicates,
-    groupByProvider: groupByProvider, warnings: warnings, summarize: summarize
+    groupByProvider: groupByProvider, warnings: warnings, summarize: summarize,
+    toggleCheck: toggleCheck, countChecked: countChecked
   };
 });

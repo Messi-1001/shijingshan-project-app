@@ -14,9 +14,9 @@ const tpl = H.req('js/data/templates.js');
 const mat = H.req('js/logic/materials.js');
 idx.buildIndex([LIST]);
 
-test('模板索引 35 条、零错误', () => {
+test('模板索引 34 条、零错误（终审 I-1 剔除身份证条目后）', () => {
   tpl.build();
-  assert.equal(tpl.allIds().length, 35);
+  assert.equal(tpl.allIds().length, 34);
   assert.deepEqual(tpl.validate(), []);
 });
 

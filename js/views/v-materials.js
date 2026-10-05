@@ -31,6 +31,8 @@
     var viewMode = 'flat'; // flat | byProvider
     var body = dom.h('div', {});
     var headInfo = dom.h('div', {});
+    // 备料勾选（终审 I-3）：内存态即可，不持久化；键为合并后材料名
+    var checkedMap = {};
 
     function currentRows() {
       var rows = mat.collect(list);
@@ -64,10 +66,22 @@
       dom.clear(body);
 
       if (viewMode === 'flat') {
-        body.appendChild(ui.section('全部材料（已合并同名）', ui.table(
-          ['材料名称', '份数', '盖章要求', '提供方', '涉及手续'],
+        // 终审 I-3：勾选列 + 「已勾选 N / 共 M」小计
+        var checkedN = mat.countChecked(checkedMap, merged);
+        body.appendChild(ui.section('全部材料（已合并同名）· 已勾选 ' + checkedN + ' / 共 ' + merged.length, ui.table(
+          ['备料', '材料名称', '份数', '盖章要求', '提供方', '涉及手续'],
           merged.map(function (r) {
-            return [r.name, r.copies || '待确认', r.seal || '待确认', r.provider || '待确认', r.from.join('、')];
+            return [
+              dom.h('input', {
+                type: 'checkbox', checked: !!checkedMap[r.name],
+                'aria-label': '备料勾选：' + r.name,
+                onChange: function (e) {
+                  checkedMap = mat.toggleCheck(checkedMap, r.name);
+                  paint();
+                }
+              }),
+              r.name, r.copies || '待确认', r.seal || '待确认', r.provider || '待确认', r.from.join('、')
+            ];
           }), { empty: '暂无可汇总的材料' })));
       } else {
         var groups = mat.groupByProvider(merged);

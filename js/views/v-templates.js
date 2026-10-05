@@ -39,6 +39,15 @@
     var customList = [];
     var keyword = (params && params.sub) || '';
 
+    // 终审 I-2：预取当前项目（state.currentId → store），供复制/导出时把占位符填成真实值。
+    // store.get 是异步的，render 同步返回，先挂 null，取到后回调闭包内生效（点击必晚于此）。
+    var curProject = null;
+    var curState = (root.SJSQ.app && root.SJSQ.app.state) || null;
+    var curId = curState ? curState.get().currentId : null;
+    if (curId && store) {
+      store.get('projects', curId).then(function (p) { curProject = p || null; }).catch(function () {});
+    }
+
     var desc = dom.h('p', { text: '存量模板 ' + data.allIds().length + ' 个。「可复用」= 空白模板 / 范本 / 请示函，支持一键复制与导出 Word；「参考」= 已填样例 / 批复 / 成果文件，仅供查看对照。' });
     var page = dom.h('div', { class: 'page' }, [
       dom.h('div', { class: 'page__head' }, [
@@ -79,7 +88,8 @@
 
               return [
                 dom.h('div', {}, [
-                  dom.h('strong', { text: t.fileName }),
+                  // 终审 I-1：显示通用化名（label || fileName），fileName 不进 UI
+                  dom.h('strong', { text: data.displayName(t) }),
                   dom.h('div', { class: 'tpl-path', text: t.dir })
                 ]),
                 ui.tag(t.type, t.type === '可复用' ? 'done' : 'idle'),
@@ -89,7 +99,7 @@
                   ui.button('复制内容', {
                     disabled: !t.editable,
                     title: t.editable ? '' : '该模板为扫描件，请下载后手工填写',
-                    onClick: function () { root.SJSQ.logic.renderTemplate.copyToClipboard(t, ui); }
+                    onClick: function () { root.SJSQ.logic.renderTemplate.copyToClipboard(t, ui, curProject); }
                   }),
                   // 自定义模板无实体文件（仅存在索引里），打开只会 404，置灰并说明
                   ui.button('打开文件', {
@@ -100,12 +110,21 @@
                   ui.button('导出 Word', {
                     disabled: !t.editable,
                     onClick: function () {
-                      var html = exp.buildDocHtml({
-                        title: t.fileName.replace(/\.pdf$/i, ''),
+                      var rt = root.SJSQ.logic.renderTemplate;
+                      var showName = data.displayName(t);
+                      if (curProject) {
+                        // 终审 I-2：有当前项目 → 12 个占位符填真实值后导出
+                        var html = rt.buildFilledDoc(showName.replace(/\.pdf$/i, ''),
+                          rt.listPlaceholders().join('\n'), curProject);
+                        rt.downloadDoc(html, showName);
+                        return;
+                      }
+                      var html0 = exp.buildDocHtml({
+                        title: showName.replace(/\.pdf$/i, ''),
                         meta: '来源：' + t.dir + '　类型：' + t.type,
                         sections: [{ h: '说明', html: '<p>本文件由模板库导出，内容为空白模板占位，请按项目实际情况填写。</p>' }]
                       });
-                      root.SJSQ.logic.renderTemplate.downloadDoc(html, t.fileName);
+                      rt.downloadDoc(html0, showName);
                     }
                   })
                 ])

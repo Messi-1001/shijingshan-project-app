@@ -4,9 +4,9 @@ const assert = require('node:assert/strict');
 const H = require('./_helpers.js');
 const t = require('../js/data/templates.js');
 
-test('模板索引共 35 条', () => {
+test('模板索引共 34 条（终审 I-1：身份证复印件条目已整条剔除）', () => {
   const out = t.build();
-  assert.equal(out.list.length, 35, '实际 ' + out.list.length + ' 条');
+  assert.equal(out.list.length, 34, '实际 ' + out.list.length + ' 条');
   assert.deepEqual(out.errors, [], out.errors.join('\n'));
 });
 
@@ -18,17 +18,17 @@ test('id 唯一且非空', () => {
 });
 
 test('allIds 返回全部 id', () => {
-  assert.equal(t.allIds().length, 35);
+  assert.equal(t.allIds().length, 34);
 });
 
-test('分类数量与 spec 第 11.1 节一致（土地 2 / 规划 6 / 发改 6 / 评价 2 / 联合验收 19）', () => {
+test('分类数量与 spec 第 11.1 节一致（土地 2 / 规划 6 / 发改 6 / 评价 2 / 联合验收 18，I-1 剔除后）', () => {
   const out = t.build();
   const count = (c) => out.list.filter((x) => x.category === c).length;
   assert.equal(count('土地手续'), 2);
   assert.equal(count('规划手续'), 6);
   assert.equal(count('发改委手续'), 6);
   assert.equal(count('各类评价'), 2);
-  assert.equal(count('联合验收'), 19);
+  assert.equal(count('联合验收'), 18);
 });
 
 test('type 只有"可复用"与"参考"两种', () => {
@@ -59,10 +59,19 @@ test('byProcedure 能按手续反查', () => {
   assert.ok(Array.isArray(hit));
 });
 
-test('search 命中文件名与分类', () => {
+test('search 命中文件名、通用化显示名与分类', () => {
   assert.ok(t.search('划拨').length >= 1);
-  assert.ok(t.search('联合验收').length >= 19);
-  assert.equal(t.search('').length, 35);
+  assert.ok(t.search('划拨决定书').length >= 1, 'label「国有建设用地划拨决定书（样例）」应可被搜到');
+  assert.ok(t.search('联合验收').length >= 18);
+  assert.equal(t.search('').length, 34);
+});
+
+test('终审 I-1（G15）：身份证复印件条目已整条剔除，索引中不得出现「邓斌」', () => {
+  const out = t.build();
+  assert.equal(t.getById('tpl-shenfen-fujian'), null, 'tpl-shenfen-fujian 应已移除');
+  assert.equal(t.search('身份证').length, 0);
+  const raw = require('../js/data/templates-index.js').RAW;
+  assert.ok(raw.every((x) => x.fileName.indexOf('邓斌') < 0 && x.id !== 'tpl-shenfen-fujian'));
 });
 
 test('不可编辑的扫描件必须标 editable:false', () => {

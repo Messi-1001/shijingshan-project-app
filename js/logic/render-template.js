@@ -72,20 +72,40 @@
     });
   }
 
-  /* ── 以下两个函数依赖 DOM，靠手动验证 ── */
+  /* ── 以下函数依赖 DOM 的部分靠手动验证；buildCopyText 为纯逻辑可测 ── */
 
-  function copyToClipboard(templateMeta, ui) {
-    var text = '【' + templateMeta.fileName + '】\n（空白模板，请按项目实际情况填写）\n\n' +
-      listPlaceholders().map(function (ph) { return ph + '：' + BLANK; }).join('\n');
+  // 终审 I-2：复制文本构建。无项目 → 占位清单（保持现状）；有项目 → 12 个占位符
+  // 经 renderText 填成真实值（未填字段留填空线）。显示名用 label || fileName（终审 I-1）。
+  function buildCopyText(templateMeta, project, today) {
+    var meta = templateMeta || {};
+    var showName = meta.label || meta.fileName || '';
+    var header = '【' + showName + '】\n';
+    if (!project) {
+      return header + '（空白模板，请按项目实际情况填写）\n\n' +
+        listPlaceholders().map(function (ph) { return ph + '：' + BLANK; }).join('\n');
+    }
+    return header + '（已按当前项目填入，请核对后使用）\n\n' +
+      renderText(listPlaceholders().join('\n'), project, today || '');
+  }
+
+  function todayStr() {
+    var u = root && root.SJSQ && root.SJSQ.core && root.SJSQ.core.util;
+    return u ? u.formatDate(new Date()) : '';
+  }
+
+  function copyToClipboard(templateMeta, ui, project) {
+    var filled = !!project;
+    var text = buildCopyText(templateMeta, project, todayStr());
+    var msg = filled
+      ? '已复制到剪贴板（已按当前项目填入 ' + listPlaceholders().length + ' 个字段，请核对）'
+      : '已复制到剪贴板（共 ' + listPlaceholders().length + ' 个待填字段）';
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(function () {
-        alert('已复制到剪贴板（共 ' + listPlaceholders().length + ' 个待填字段）');
-      });
+      navigator.clipboard.writeText(text).then(function () { alert(msg); });
     } else {
       var ta = document.createElement('textarea');
       ta.value = text; document.body.appendChild(ta); ta.select();
       document.execCommand('copy'); document.body.removeChild(ta);
-      alert('已复制到剪贴板');
+      alert(msg);
     }
   }
 
@@ -103,6 +123,6 @@
     PLACEHOLDERS: PLACEHOLDERS, BLANK: BLANK,
     renderText: renderText, fillMissing: fillMissing,
     listPlaceholders: listPlaceholders, buildFilledDoc: buildFilledDoc,
-    copyToClipboard: copyToClipboard, downloadDoc: downloadDoc
+    buildCopyText: buildCopyText, copyToClipboard: copyToClipboard, downloadDoc: downloadDoc
   };
 });
