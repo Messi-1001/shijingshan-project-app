@@ -14,6 +14,13 @@ test('durationOf 取 duration 优先', () => {
   assert.equal(s.durationOf({ id: 'x', duration: 4 }), 4);
 });
 
+test('durationOf 支持 durationDays 与字符串工期（数据真实工期不再被忽略）', () => {
+  assert.equal(s.durationOf({ id: 'lx-7', duration: '2 个月', durationDays: 44 }), 44, 'durationDays 优先');
+  assert.equal(s.durationOf({ id: 'g-1', duration: '3 个月', durationDays: null }), 90, '「N 个月」按 30 天/月');
+  assert.equal(s.durationOf({ id: 'g-2', duration: '20 工作日', durationDays: null }), 20, '「N 工作日」直取');
+  assert.equal(s.durationOf({ id: 'g-3', duration: '', durationDays: null }), 10, '空串走前缀缺省');
+});
+
 // durationOf 前缀缺省兜底
 test('durationOf 无 duration 时按编号前缀取缺省', () => {
   assert.equal(s.durationOf({ id: 'yd-2' }), 7);

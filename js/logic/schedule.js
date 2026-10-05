@@ -11,8 +11,24 @@
 
   function prefixOf(id) { return String(id).split('-')[0]; }
 
+  // 解析数据里的字符串工期：「20 工作日」→20，「3 个月」→90（按 30 天/月匡算）
+  function parseDurationStr(s) {
+    var m = String(s || '').match(/(\d+)\s*个?\s*月/);
+    if (m) return +m[1] * 30;
+    m = String(s || '').match(/(\d+)\s*工作日/);
+    if (m) return +m[1];
+    return 0;
+  }
+
   function durationOf(p) {
-    if (p && typeof p.duration === 'number' && p.duration > 0) return p.duration;
+    if (p) {
+      if (typeof p.duration === 'number' && p.duration > 0) return p.duration;
+      if (typeof p.durationDays === 'number' && p.durationDays > 0) return p.durationDays;
+      if (typeof p.duration === 'string') {
+        var d = parseDurationStr(p.duration);
+        if (d > 0) return d;
+      }
+    }
     var k = prefixOf(p && p.id);
     return DEFAULT_DURATION[k] || DEFAULT_DURATION.default;
   }
