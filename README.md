@@ -17,3 +17,9 @@ cd "D:/4workbuddy工作空间/2毕业设计/3代码实施"
 - `js/logic/` 纯函数逻辑（不碰 DOM、不碰存储），全部有 Node 测试
 - `js/views/` 页面渲染
 - `tests/` Node 内置测试运行器用例
+
+## 待手动核对的 DOM 行为（Task 4 / Task 9 完成时执行）
+- [ ] `h('div', {class:'x', text:'你好'})` 渲染出带 class 的 div
+- [ ] `h('button', {onClick: fn})` 点击触发 fn
+- [ ] `h('input', {value:'a'})` 输入框初值为 a
+- [ ] 事件委托 `on(root,'click','.row',fn)` 点击子元素能命中
