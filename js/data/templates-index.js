@@ -10,7 +10,10 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
 
-  var DIR = '文件模板';
+  // 路径基准（2026-10-05 用户迁移后核对）：全部资料模板位于仓库上一级
+  // `2毕业设计/文件模板/`，相对 index.html 必须写 `../文件模板`，
+  // 否则「打开文件」解析到 3代码实施/文件模板/ 报 ERR_FILE_NOT_FOUND。
+  var DIR = '../文件模板';
   // label：通用化显示名（UI 与导出 meta 一律显示它）；fileName 只用于打开文件的真实路径，
   // 不进任何用户可见文本（终审 I-1：真实项目名/人名脱敏，G15）。
   function T(id, fileName, dir, category, type, editable, procedureIds, placeholderId, label) {

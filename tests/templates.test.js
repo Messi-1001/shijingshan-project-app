@@ -102,3 +102,29 @@ test('pickFocusTemplate 在模板列表里定位聚焦目标（找不到返回 n
   assert.equal(vt.pickFocusTemplate(out.list, 'no-such'), null);
   assert.equal(vt.pickFocusTemplate(out.list, ''), null);
 });
+
+/* —— 模板文件实际位置（2026-10-05 用户迁移）：全部资料模板位于仓库上一级
+ *    `2毕业设计/文件模板/`，路径基准必须是 `../文件模板`（相对 index.html），
+ *    否则「打开文件」会解析到 3代码实施/文件模板/ 报 ERR_FILE_NOT_FOUND。 —— */
+test('打开路径基准：全部条目 dir 以 ../ 开头（指向仓库上一级资料目录）', () => {
+  const raw = require('../js/data/templates-index.js').RAW;
+  assert.ok(raw.length >= 34);
+  for (const x of raw) {
+    assert.ok(x.dir.indexOf('../') === 0, x.id + ' 的 dir 应以 ../ 开头，实为 ' + x.dir);
+  }
+});
+
+test('打开路径真实存在：dir + fileName 在仓库上一级逐一命中（目录存在时校验）', () => {
+  const fs = require('node:fs');
+  const path = require('node:path');
+  // 与浏览器同构的解析基准：index.html 所在目录（3代码实施），
+  // dir 里的 `../` 由 path.join 归一化完成跳级——不额外抬高 base。
+  const base = path.resolve(__dirname, '..');
+  const dir = path.join(base, '文件模板');
+  if (!fs.existsSync(dir)) return; // 纯代码仓库场景（资料目录不随 git 分发）只跑上一条前缀断言
+  const raw = require('../js/data/templates-index.js').RAW;
+  for (const x of raw) {
+    const p = path.join(base, x.dir, x.fileName);
+    assert.ok(fs.existsSync(p), x.id + ' 指向的文件不存在: ' + x.dir + '/' + x.fileName);
+  }
+});
