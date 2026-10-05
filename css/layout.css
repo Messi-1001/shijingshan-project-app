@@ -84,3 +84,6 @@
 /* 页面 4：手续详情（Task 22） */
 .breadcrumb { font-size: var(--f-sm); margin-bottom: var(--s-2); }
 .breadcrumb a { color: var(--c-text-sub); }
+
+/* 全量手续库：名称行内串/并联小标签（Task 23 补丁） */
+.lib-name .ui-tag { margin-left: 6px; }

@@ -53,15 +53,22 @@
       dom.clear(body);
       var list = idx.searchProcedures(keyword);
       var groups = groupForDisplay(list);
+      var graph = root.SJSQ.logic.graph;
+      var all = idx.getAll();
 
       groups.forEach(function (g) {
         var rows = g.items.map(function (p) {
+          // 串/并联标注：数据 parallel 字段 + 依赖图并联识别（同批非空前置的对等项）
+          var isParallel = !!p.parallel || graph.parallelPeers(all, p.id).length > 0;
           return [
             p.no === null ? '—' : String(p.no),
-            dom.h('a', {
-              href: '#/detail/' + p.id,
-              text: p.name
-            }),
+            dom.h('span', { class: 'lib-name' }, [
+              dom.h('a', {
+                href: '#/detail/' + p.id,
+                text: p.name
+              }),
+              ui.tag(isParallel ? '可并联' : '串联', isParallel ? 'info' : 'idle')
+            ]),
             p.dept || '—',
             p.duration || '—',
             (p.prev || []).length ? String((p.prev || []).length) + ' 项' : '无',

@@ -100,8 +100,24 @@
     return path;
   }
 
+  // 并联识别：与 id 前置集合完全相同（且前置非空）的其他手续，即为可并联推进的对等项。
+  // 空 prev 不作为并联证据（互相独立的起点手续天然"同批"，但不构成并联关系）。
+  function parallelPeers(list, id) {
+    var gr = buildGraph(list);
+    var p = gr.byId[id];
+    if (!p) return [];
+    var key = (p.prev || []).slice().sort(function (a, b) { return a < b ? -1 : a > b ? 1 : 0; }).join('|');
+    if (!key) return [];
+    return Object.keys(gr.byId).filter(function (other) {
+      if (other === id) return false;
+      var okey = (gr.byId[other].prev || []).slice().sort(function (a, b) { return a < b ? -1 : a > b ? 1 : 0; }).join('|');
+      return okey === key;
+    });
+  }
+
   return {
     buildGraph: buildGraph, topoOrder: topoOrder, descendants: descendants,
-    blockedBy: blockedBy, readyToStart: readyToStart, criticalPath: criticalPath
+    blockedBy: blockedBy, readyToStart: readyToStart, criticalPath: criticalPath,
+    parallelPeers: parallelPeers
   };
 });

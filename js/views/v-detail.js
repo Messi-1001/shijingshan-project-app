@@ -59,7 +59,7 @@
     if (!m) {
       return dom.h('div', { class: 'page' }, [
         dom.h('h1', { text: '手续详情' }),
-        ui.empty('找不到手续费：' + id, '请返回全量手续库重新选择')
+        ui.empty('找不到手续：' + id, '请返回全量手续库重新选择')
       ]);
     }
 

@@ -57,3 +57,17 @@ test('buildGraph 输出结构', () => {
   assert.deepEqual(gr.edges.d, ['b', 'c']);
   assert.equal(gr.byId.c.durationDays, 2);
 });
+
+test('parallelPeers 找出同批前置的对等手续（并联识别）', () => {
+  assert.deepEqual(g.parallelPeers(L, 'b'), ['c']);
+  assert.deepEqual(g.parallelPeers(L, 'c'), ['b']);
+});
+
+test('parallelPeers 空前置不构成并联证据', () => {
+  assert.deepEqual(g.parallelPeers(L, 'a'), []);
+});
+
+test('parallelPeers 前置集合不同则不是对等', () => {
+  assert.deepEqual(g.parallelPeers(L, 'd'), []);
+  assert.deepEqual(g.parallelPeers(L, '不存在'), []);
+});
