@@ -145,10 +145,209 @@
     return true;
   }
 
+  /* —— Task 60：导出扩展（清单/进度 Word + 全量 CSV + 汇报数据装配）—— */
+
+  // 双环境模块解析：Node 走 require，浏览器走 SJSQ.logic（brief 里纯 require 在浏览器会退化）
+  function dep(name) {
+    try { return require('./' + name + '.js'); } catch (e) { /* 浏览器无 require */ }
+    var root = (typeof self !== 'undefined') ? self : globalThis;
+    return (root.SJSQ && root.SJSQ.logic && root.SJSQ.logic[name]) || null;
+  }
+
+  var STATUS_CN = { idle: '未开始', doing: '办理中', done: '已办结' };
+
+  function csvCell(v) {
+    var s = String(v == null ? '' : v);
+    if (/[",\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+    return s;
+  }
+
+  function buildAllCsv(index, checklist) {
+    var head = ['编号', '名称', '板块', '主管部门', '标准时长(天)', '前置编号', '状态', '备注'];
+    var rows = [head.map(csvCell).join(',')];
+    (index.list || []).forEach(function (p) {
+      var st = (checklist && checklist[p.id] && checklist[p.id].status) || 'idle';
+      rows.push([
+        p.no, p.name, p.section || '', p.dept || '',
+        p.duration || '', (p.prev || []).join(' '),
+        STATUS_CN[st] || st,
+        (checklist && checklist[p.id] && checklist[p.id].note) || '',
+      ].map(csvCell).join(','));
+    });
+    return rows.join('\r\n');
+  }
+
+  function downloadCsv(csv, fileName) {
+    if (typeof Blob === 'undefined' || typeof URL === 'undefined' ||
+        !URL.createObjectURL || typeof document === 'undefined' || !document.body) {
+      return false;
+    }
+    var blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = fileName.endsWith('.csv') ? fileName : fileName + '.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+    return true;
+  }
+
+  function buildProcedureListDoc(index, checklist, projectName) {
+    var rows = (index.list || []).map(function (p) {
+      var c = (checklist && checklist[p.id]) || {};
+      var st = STATUS_CN[c.status || 'idle'];
+      return [p.no, p.name, p.section || '', p.dept || '', st, (p.prev || []).join('、'), c.note || ''];
+    });
+    var done = rows.filter(function (r) { return r[4] === '已办结'; }).length;
+    var html = buildTableHtml(['编号', '手续名称', '板块', '主管部门', '状态', '前置手续', '备注'], rows);
+    var doc = buildDocHtml({
+      title: projectName + ' 工程前期手续清单',
+      meta: '共 ' + rows.length + ' 项，已办结 ' + done + ' 项',
+      sections: [{ h: '一、手续清单', html: html }],
+    });
+    // Word 打开不依赖 DOCTYPE；按契约以 <html 开头
+    return doc.replace(/^<!DOCTYPE html>\n?/, '');
+  }
+
+  function buildScheduleDoc(view, projectName) {
+    var rows = view.rows.map(function (r) {
+      return [r.no, r.name, r.dur + ' 天', r.est, r.eft, r.critical ? '是' : ''];
+    });
+    var ms = view.milestones.map(function (m) { return [m.name, m.date]; });
+    return buildDocHtml({
+      title: projectName + ' 工程进度计划',
+      meta: view.mode === 'forward' ? '排期方式：正排' : '排期方式：倒排',
+      sections: [
+        { h: '一、排期总览', html: '<p>计划区间：' + view.range.start + ' 至 ' + view.range.end + '，共 ' + view.totalDays + ' 天。</p>' },
+        { h: '二、逐项排期', html: buildTableHtml(['编号', '手续名称', '工期', '最早开始', '最早完成', '关键路径'], rows) },
+        { h: '三、关键节点', html: buildTableHtml(['节点', '计划日期'], ms) },
+      ],
+    });
+  }
+
+  function buildReportData(ctx) {
+    var index = ctx.index || { list: [], byId: {} };
+    var checklist = ctx.checklist || {};
+    var projectName = ctx.projectName || '未命名项目';
+    var slides = [];
+
+    slides.push({
+      layout: 'title',
+      title: projectName + ' 前期手续工作汇报',
+      subtitle: '石景山区学校工程「前期手续 → 竣工验收」辅助系统 · ' + new Date().toISOString().slice(0, 10),
+      bullets: [],
+    });
+
+    // 1) 项目概况（固定四维口径）
+    var pv = ctx.projectValues || {};
+    slides.push({
+      title: '一、项目概况',
+      bullets: [
+        '建设性质：' + (pv.buildNature || '新建'),
+        '项目投资规模：' + (pv.investScale || '3000 万以上'),
+        '资金来源：' + (pv.fundSource || '财政资金') + '（市级、区级各承担 50%）',
+        '审批层级：' + (pv.approvalLevel || '市级'),
+        '本次口径下无需按维度裁剪，清单以全量登记为准。',
+      ],
+    });
+
+    // 2) 手续流程
+    var sections = {};
+    index.list.forEach(function (p) { var s = p.section || '未分组'; (sections[s] = sections[s] || []).push(p); });
+    var flowBullets = Object.keys(sections).map(function (s) {
+      return s + '：' + sections[s].length + ' 项（' + sections[s][0].no + '–' + sections[s][sections[s].length - 1].no + '）';
+    });
+    var reserved = index.list.filter(function (p) { return p.reserved; });
+    flowBullets.push('合计登记 ' + index.list.length + ' 项，其中有效 ' + (index.list.length - reserved.length) + ' 项、预留 ' + reserved.length + ' 项。');
+    flowBullets.push('流程止于竣工验收备案，收尾结算仅作说明、不单独编号。');
+    slides.push({ title: '二、手续流程总览', bullets: flowBullets });
+
+    // 3) 进度
+    var prog = null;
+    try { var pm = dep('progress'); prog = pm ? pm.summarize(index.list, checklist) : null; } catch (e) { prog = null; }
+    var schedView = null;
+    if (ctx.scheduleInput) {
+      try {
+        var sc = dep('schedule');
+        var sched = sc.buildSchedule(index.list, ctx.scheduleInput);
+        schedView = { mode: ctx.scheduleInput.mode, range: sched.range, totalDays: sched.totalDays };
+      } catch (e) { schedView = null; }
+    }
+    slides.push({
+      title: '三、办理进度与计划排期',
+      bullets: (prog ? [
+        '总体完成度：' + prog.percent + '%（已办结 ' + prog.done + ' 项 / 办理中 ' + prog.doing + ' 项 / 未开始 ' + prog.idle + ' 项）',
+      ] : ['进度数据待录入。']).concat(schedView ? [
+        '计划区间：' + schedView.range.start + ' 至 ' + schedView.range.end + '，共 ' + schedView.totalDays + ' 天',
+        '排期方式：' + (schedView.mode === 'forward' ? '正排（自开工日往后推）' : '倒排（自竣工日往前推）'),
+      ] : []),
+    });
+
+    // 4) 招标计划
+    var tenderBullets = ['招标分四类：设计、勘察、监理、施工。', '各环节标准天数：公告 20 天 / 答疑 5 天 / 开标 1 天 / 评标 5 天 / 公示 3 天 / 中标通知 2 天 / 合同签订 5 天。'];
+    if (ctx.tenderInput) {
+      try {
+        var tender = dep('tender');
+        if (tender && tender.adviseMethod) {
+          var adv = tender.adviseMethod(ctx.tenderInput);
+          tenderBullets.push('施工招标方式建议：' + adv.method + '（' + adv.reasons.join('；') + '）');
+        }
+      } catch (e) { /* 忽略 */ }
+    }
+    tenderBullets.push('建议勘察设计招标提前开展，避免压缩后续施工图与报建时间。');
+    slides.push({ title: '四、招标工作时间计划', bullets: tenderBullets });
+
+    // 5) 投资
+    var est = null;
+    if (ctx.estimateInput && ctx.estimateInput.工程费用 > 0) {
+      var estMod = dep('estimate');
+      est = estMod ? estMod.calcEstimate({ 工程费用: ctx.estimateInput.工程费用 }) : null;
+    }
+    if (est) {
+      slides.push({
+        title: '五、投资估算',
+        bullets: [
+          '工程费用：' + est.工程费用 + ' 万元',
+          '工程建设其他费：' + est.otherSubtotal + ' 万元',
+          '基本预备费：' + est.reserve + ' 万元',
+          '项目总投资：' + est.projectTotal + ' 万元',
+          '注：取费费率为前期匡算参考值，最终以现行取费文件与财政评审结论为准。',
+        ],
+      });
+    } else {
+      slides.push({ title: '五、投资估算', bullets: ['尚未录入工程费用，请先在「投资估算」页匡算后重新导出。'] });
+    }
+
+    // 6) 建议
+    var adviceList = [];
+    try {
+      var am = dep('advice');
+      if (am) adviceList = am.buildAdvice({
+        index: index, checklist: checklist, projectValues: pv,
+        scheduleInput: ctx.scheduleInput, hasEstimate: !!(ctx.estimateInput && ctx.estimateInput.工程费用 > 0),
+      });
+    } catch (e) { adviceList = []; }
+    slides.push({
+      title: '六、当前建议',
+      bullets: adviceList.slice(0, 6).map(function (a) {
+        return '【' + (a.level === 'block' ? '紧要' : a.level === 'warn' ? '注意' : '提示') + '】' + a.title + ' —— ' +
+          String(a.body).replace(/\n+/g, '；');
+      }).concat(adviceList.length ? [] : ['暂无特别提醒。']),
+    });
+
+    return { title: projectName + ' 前期手续工作汇报', subtitle: '', slides: slides };
+  }
+
   return {
     escapeCell: escapeCell, buildTableHtml: buildTableHtml,
     buildDocHtml: buildDocHtml, docFileName: docFileName, wordMime: wordMime,
     buildEstimateDoc: buildEstimateDoc,
-    downloadDoc: downloadDoc
+    downloadDoc: downloadDoc,
+    csvCell: csvCell,
+    buildAllCsv: buildAllCsv,
+    downloadCsv: downloadCsv,
+    buildProcedureListDoc: buildProcedureListDoc,
+    buildScheduleDoc: buildScheduleDoc,
+    buildReportData: buildReportData
   };
 });

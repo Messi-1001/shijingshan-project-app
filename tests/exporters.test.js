@@ -93,3 +93,58 @@ test('docFileName 带日期后缀', () => {
   const n = e.docFileName('某项目-投资估算表', '2026-09-25');
   assert.equal(n, '某项目-投资估算表-2026-09-25.doc');
 });
+
+/* —— Task 60：导出扩展（清单/进度 Word + 全量 CSV + 汇报数据装配）—— */
+const X = e;
+
+test('csvCell 处理逗号/引号/换行', () => {
+  assert.equal(X.csvCell('a,b'), '"a,b"');
+  assert.equal(X.csvCell('say "hi"'), '"say ""hi"""');
+  assert.equal(X.csvCell('l1\nl2'), '"l1\nl2"');
+  assert.equal(X.csvCell('plain'), 'plain');
+});
+
+test('buildAllCsv 表头固定且行数等于清单数', () => {
+  const index = { list: [
+    { id: 'lx-1', no: '1', name: '项目建议书', dept: '区发改委', duration: 15, prev: [] },
+    { id: 'lx-2', no: '2', name: '批复', dept: '区发改委', duration: 5, prev: ['lx-1'] },
+  ] };
+  const csv = X.buildAllCsv(index, { 'lx-1': { status: 'done' } });
+  const lines = csv.trim().split('\n');
+  assert.equal(lines.length, 3);
+  assert.ok(lines[0].includes('编号'));
+  assert.ok(lines[0].includes('前置'));
+  assert.ok(lines[1].includes('项目建议书'));
+  assert.ok(lines[1].includes('已办结'));
+});
+
+test('buildProcedureListDoc 产出完整 HTML 文档', () => {
+  const index = { list: [{ id: 'lx-1', no: '1', name: '项目建议书', dept: '区发改委' }] };
+  const html = X.buildProcedureListDoc(index, {}, '琅山学校新建工程');
+  assert.ok(html.startsWith('<html'));
+  assert.ok(html.includes('琅山学校新建工程'));
+  assert.ok(html.includes('border="1"'));
+  assert.ok(html.includes('项目建议书'));
+});
+
+test('buildReportData 六类内容齐全', () => {
+  const ctx = {
+    projectName: '测试项目',
+    index: { list: [{ id: 'lx-1', no: '1', name: '项目建议书', dept: '区发改委', duration: 15, prev: [] }], byId: { 'lx-1': { id: 'lx-1', no: '1', name: '项目建议书', dept: '区发改委', duration: 15, prev: [] } } },
+    checklist: {}, scheduleInput: { mode: 'forward', startDate: '2026-10-01', targetEndDate: '2027-10-01' },
+    estimateInput: null, tenderInput: null,
+  };
+  const r = X.buildReportData(ctx);
+  assert.ok(r.title.includes('测试项目'));
+  assert.ok(r.slides.length >= 6);
+  const titles = r.slides.map((s) => s.title).join('|');
+  ['项目概况', '手续', '进度', '招标', '投资', '建议'].forEach((k) => assert.ok(titles.includes(k), '缺 ' + k));
+  assert.equal(r.slides[0].layout, 'title');
+});
+
+test('buildReportData 在没有估算时给出提示而不是崩', () => {
+  const ctx = { projectName: 'P', index: { list: [], byId: {} }, checklist: {}, scheduleInput: { mode: 'forward', startDate: '2026-10-01', targetEndDate: '2027-10-01' } };
+  const r = X.buildReportData(ctx);
+  assert.ok(r.slides.every((s) => Array.isArray(s.bullets)));
+  assert.ok(r.slides.some((s) => s.title.includes('投资')));
+});
