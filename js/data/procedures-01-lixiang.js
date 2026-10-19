@@ -27,7 +27,7 @@
       id: 'lx-2', no: 2, name: '评审公司评审', section: 'lixiang',
       dept: '第三方投资评审 / 咨询机构',
       duration: '', durationDays: null, prev: ['lx-1'],
-      notes: '**A 段第 2 步**。委托评审机构出具评审意见（可研 / 投资估算评审）。',
+      notes: '**A 段第 2 步**。委托评审机构出具评审意见（可研 / 投资估算评审）。**注意：本项与多规合一初审意见（gh-1，第15项）无先后关系**，评审公司评审只需等第1项线下沟通完成即可开展。',
       basis: '实操惯例',
       materials: [
         { name: '评审委托书', copies: 1, seal: '双方盖章', provider: '建设单位' },
@@ -38,8 +38,8 @@
     mk({
       id: 'lx-3', no: 3, name: '市发改委上主任会', section: 'lixiang',
       dept: '市发改委主任办公会',
-      duration: '', durationDays: null, prev: ['lx-2'],
-      notes: '**A 段第 3 步**。上会审议通过。',
+      duration: '', durationDays: null, prev: ['lx-2', 'gh-1'],
+      notes: '**A 段第 3 步**。上会审议通过。**依赖要点：本项须在多规合一初审意见（gh-1，第15项）办理完成之后才能上会**——没有多规合一初审意见，不能进行市发改委上主任会的流程。除沿用第2项（lx-2）的转手关系外，另行显式挂 gh-1，以便办事人员在清单上一眼看清约束，不需自行向前推导。',
       basis: '实操惯例',
       materials: [{ name: '上会汇报材料', copies: 5, seal: '加盖建设单位公章', provider: '建设单位' }],
       source: '✅'

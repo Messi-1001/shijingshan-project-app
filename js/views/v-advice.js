@@ -20,7 +20,10 @@
   // 不是模块 SJSQ.core.store（后者只有 createMemoryStore/assertStoreContract/TABLES）。
   function collectInput(store) {
     var s = store || (typeof window !== 'undefined' && window.SJSQ && window.SJSQ.app && window.SJSQ.app.store);
-    var index = (typeof window !== 'undefined' && window.SJSQ && window.SJSQ.data && window.SJSQ.data.proceduresIndex) || { list: [], byId: {} };
+    var index = (typeof window !== 'undefined' && window.SJSQ && window.SJSQ.data && window.SJSQ.data.index
+      && typeof window.SJSQ.data.index.getAll === 'function')
+      ? { list: window.SJSQ.data.index.getAll(), byId: {} }
+      : { list: [], byId: {} };
     var fallbackSched = (typeof window !== 'undefined' && window.SJSQ && window.SJSQ.views && window.SJSQ.views.vSchedule)
       ? window.SJSQ.views.vSchedule.defaultInput()
       : { mode: 'forward', startDate: '2026-01-01', targetEndDate: '2027-01-01' };

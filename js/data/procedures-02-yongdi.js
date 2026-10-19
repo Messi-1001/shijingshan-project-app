@@ -15,11 +15,14 @@
 
   return [
     mk({
-      id: 'yd-1', no: 8, name: '取得一级开发单位划拨土地', section: 'yongdi',
-      dept: '一级开发单位', duration: '', durationDays: null, prev: [],
-      notes: '从一级开发单位取得已完成一级开发的划拨土地。需先完成土地一级开发及验收。',
+      id: 'yd-1', no: 8, name: '与土地开发单位签订土地移交协议', section: 'yongdi',
+      dept: '一级开发单位（土地开发单位）', duration: '', durationDays: null, prev: [],
+      notes: '与土地开发单位签订土地移交协议，明确移交地块的四至范围、面积、交付现状与双方责任。**本项是② 用地手续的起点**，协议签订完成后方可进入后续钉桩、用地预审等环节。土地须已完成一级开发并通过验收。',
       basis: '土地储备与一级开发管理规定',
-      materials: [{ name: '一级开发土地移交确认单', copies: 2, seal: '双方盖章', provider: '一级开发单位' }],
+      materials: [
+        { name: '土地移交协议', copies: 4, seal: '双方盖章', provider: '一级开发单位' },
+        { name: '一级开发土地验收意见', copies: 2, seal: '加盖主管部门章', provider: '一级开发单位' }
+      ],
       source: '✅'
     }),
     mk({
@@ -35,8 +38,8 @@
     }),
     mk({
       id: 'yd-3', no: 10, name: '用地预审与选址意见书', section: 'yongdi',
-      dept: '规划和自然资源部门', duration: '20 工作日', durationDays: 20, prev: ['yd-2'],
-      notes: '建设项目用地预审与选址意见书，是规划报建的前置条件。',
+      dept: '规划和自然资源部门', duration: '20 工作日', durationDays: 20, prev: ['yd-2', 'gh-1'],
+      notes: '建设项目用地预审与选址意见书，是规划报建的前置条件。**依赖要点：本项必须在多规合一初审意见（gh-1，第15项）办理完成之后才能开始**——多规合一初审意见是用地选址符合性审查的前置结论，未出结论则本项无从受理。因此本项虽然登记编号为第10项，实际办理时点晚于第15项（编号仅表示清单登记顺序，不代表办理先后）。',
       basis: '建设项目用地预审管理办法；城乡规划法',
       materials: [
         { name: '用地预审与选址意见书申请表', copies: 1, seal: '加盖建设单位公章', provider: '建设单位' },

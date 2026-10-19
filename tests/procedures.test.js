@@ -67,8 +67,11 @@ test('⑦ 的并联与串联关系正确', () => {
 test('① 的 A 段与 B 段严格先后', () => {
   const byId = idx.buildIndex(lists).byId;
   assert.deepEqual(byId['lx-1'].prev, []);
-  assert.deepEqual(byId['lx-2'].prev, ['lx-1']);
-  assert.deepEqual(byId['lx-3'].prev, ['lx-2']);
+  // lx-3 另显式挂 gh-1（多规合一初审意见，2026-10-08 修正）；lx-2 与第15项无关
+  assert.ok(byId['lx-2'].prev.includes('lx-1'));
+  assert.equal(byId['lx-2'].prev.includes('gh-1'), false, 'lx-2 不应依赖 gh-1');
+  assert.ok(byId['lx-3'].prev.includes('lx-2'));
+  assert.ok(byId['lx-3'].prev.includes('gh-1'));
   assert.deepEqual(byId['lx-4'].prev, ['lx-3']);
   assert.deepEqual(byId['lx-5'].prev, ['lx-4']);   // B 段必须等 A 段
   assert.deepEqual(byId['lx-6'].prev, ['lx-5']);

@@ -14,6 +14,23 @@
       .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
+  // 板块键（如 lixiang）→ 中文标签（如「① 前期立项」）。映射由调用方经 opts 注入，
+  // 保持本模块零数据依赖；未注入时回退显示原始键，不至于出现空白标题。
+  var SECTION_FALLBACK = {
+    lixiang: '① 前期立项', yongdi: '② 用地手续', guihua: '③ 规划报建',
+    pingjia: '④′ 各类评价', zhaobiao: '④ 招标与合同', shigong: '⑤ 施工许可',
+    jungong: '⑦ 竣工验收'
+  };
+
+  function sectionLabel(key, map) {
+    var m = map || SECTION_FALLBACK;
+    if (m[key]) {
+      var s = m[key];
+      return typeof s === 'string' ? s : ((s.no ? s.no + ' ' : '') + (s.name || key));
+    }
+    return key;
+  }
+
   function groupBySection(list) {
     var order = [], map = {};
     list.forEach(function (p) {
@@ -29,6 +46,7 @@
     opts = opts || {};
     var list = (index && index.list) || [];
     var g = groupBySection(list);
+    var labels = opts.sectionLabels || SECTION_FALLBACK;
     var nodes = [], bands = [];
     var y = NODE.padTop;
     var maxCols = 0;
@@ -36,7 +54,7 @@
     g.order.forEach(function (section) {
       var row = g.map[section];
       maxCols = Math.max(maxCols, row.length);
-      bands.push({ section: section, y: y - NODE.bandTitle, title: section + '（' + row.length + ' 项）' });
+      bands.push({ section: section, y: y - NODE.bandTitle, title: sectionLabel(section, labels) + '（' + row.length + ' 项）' });
       row.forEach(function (p, i) {
         nodes.push({
           id: p.id, no: p.no, name: p.name, section: section,
@@ -47,17 +65,36 @@
       y += NODE.h + NODE.gapY + NODE.bandTitle;
     });
 
-    var byId = {};
+var byId = {};
     nodes.forEach(function (n) { byId[n.id] = n; });
+    var srcById = {};
+    list.forEach(function (p) { srcById[p.id] = p; });
+
+    var step = NODE.w + NODE.gapX;
     var edges = [];
-    nodes.forEach(function (n) {
-      var p = null;
-      for (var i = 0; i < list.length; i++) if (list[i].id === n.id) { p = list[i]; break; }
-      var prev = (p && p.parallel) ? [] : ((p && p.prev) || []);
+nodes.forEach(function (n) {
+      var src = srcById[n.id];
+      var prev = (src && src.parallel) ? [] : ((src && src.prev) || []);
+
+      // 跨板块前置关系：**不画连线**，改为写进节点的 depNote文字。
+      // 理由：一条跨板块连线最长要横跨1600px（是相邻连线的 70+倍），
+      // 绕行后视觉上比「没有线」更容易被误读成另一组串联。
+      var cross = [];
+      prev.forEach(function (pid) {
+        var a = byId[pid];
+        if (a && a.section !== n.section) cross.push(a);
+      });
+      n.depNote = cross.map(function (a) {
+        return '前置：第' + a.no + '项 ' + a.name;
+      }).join('；');
+
+      // 只画「同板块且左右相邻」的连线，形成一条干净的横向主流程。
       prev.forEach(function (pid) {
         var a = byId[pid];
         if (!a) return;
-        edges.push({ from: pid, to: n.id, d: edgePath(a, n) });
+        if (a.section !== n.section) return;                 // 跨板块 → 只留文字
+        if (Math.abs(Math.round((n.x - a.x) / step)) !== 1) return; // 跳格 → 靠编号顺序
+        edges.push({ from: pid, to: n.id, d: edgePath(a, n), dashed: false });
       });
     });
 
@@ -65,18 +102,13 @@
     var height = y - NODE.gapY + NODE.padTop / 2;
     return { width: width, height: height, bands: bands, nodes: nodes, edges: edges, NODE: NODE };
   }
-
+  // 路径规划：现在只处理「同板块内左右相邻」这一种情形 —— 一条水平直线。
+  // 为什么退化到只支持这一种：跨板块连线实测最长要横跨 1600px，是相邻连线(23px)的 70+倍，
+  // 绕行后视觉上比「没有线」更容易被误读成另一组串联（用户 2026-10-08 决策）。
+  // 跨板块前置关系改为写在节点框内的depNote 文字里。
   function edgePath(a, b) {
-    var sx = a.x + a.w, sy = a.y + a.h / 2;
-    var ex = b.x - 3, ey = b.y + b.h / 2;
-    if (Math.abs(sy - ey) < 1) return 'M' + sx + ' ' + sy + ' H' + ex;
-    if (ex > sx + 8) {
-      var mx = sx + (ex - sx) / 2;
-      return 'M' + sx + ' ' + sy + ' H' + mx + ' V' + ey + ' H' + ex;
-    }
-    // 目标在左侧：绕行到行下方再折回
-    var uy = Math.max(a.y + a.h, b.y + b.h) + 16;
-    return 'M' + sx + ' ' + sy + ' H' + (sx + 14) + ' V' + uy + ' H' + (b.x + b.w / 2) + ' V' + (b.y + b.h);
+    var sy = a.y + a.h / 2;
+    return 'M' + (a.x + a.w) + ' ' + sy + ' H' + (b.x - 3);
   }
 
   function buildFlowSvg(layout, opts) {
@@ -100,6 +132,9 @@
       parts.push('<path d="' + e.d + '" fill="none" stroke="' + (on ? '#3b7ddd' : '#9aa3ae') + '" stroke-width="' + (on ? 2 : 1.2) + '" marker-end="url(#arw)"/>');
     });
 
+    // 有跨板块前置的节点：框内底部加一条橙色说明文字（不画绕圈连线）
+    var hasDep = layout.nodes.some(function (n) { return !!n.depNote; });
+
     layout.nodes.forEach(function (n) {
       var st = statusOf(n.id);
       var isHl = hl && n.id === hl;
@@ -114,7 +149,17 @@
       parts.push('<text x="' + (n.x + 10) + '" y="' + (n.y + 33) + '" font-size="12.5" fill="#1f2733">' + esc(line1) + '</text>');
       if (line2) parts.push('<text x="' + (n.x + 10) + '" y="' + (n.y + 47 - 2) + '" font-size="12.5" fill="#1f2733">' + esc(line2) + '</text>');
       if (n.h < 46) parts.push('<title>' + esc(name) + '</title>');
+      // 跨板块前置说明：框内底部小字，橙色以区别于流程线
+      if (n.depNote) {
+        parts.push('<text x="' + (n.x + 8) + '" y="' + (n.y + n.h - 6) + '" font-size="10" fill="#b8730f">' +
+          esc(n.depNote.length > 22 ? n.depNote.slice(0, 21) + '…' : n.depNote) + '</text>');
+      }
     });
+
+    if (hasDep) {
+      parts.push('<text x="' + NODE.padLeft + '" y="' + (layout.height - 8) +
+        '" font-size="10.5" fill="#8a6d3b">注：框内橙色小字为跨板块前置条件（第15项 多规合一初审意见），本图不再为其绘制连线。</text>');
+    }
 
     parts.push('</svg>');
     return parts.join('');
@@ -167,5 +212,6 @@
   return {
     NODE: NODE, TONE: TONE, STROKE: STROKE,
     esc: esc, flowLayout: flowLayout, edgePath: edgePath, buildFlowSvg: buildFlowSvg, exportFlowImage: exportFlowImage,
+    sectionLabel: sectionLabel, SECTION_FALLBACK: SECTION_FALLBACK,
   };
 });

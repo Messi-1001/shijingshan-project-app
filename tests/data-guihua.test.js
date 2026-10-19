@@ -13,11 +13,20 @@ test('③ 规划报建：共 6 条，编号 15–20', () => {
   guihua.forEach((p) => assert.equal(p.section, 'guihua'));
 });
 
-test('③ 严格串联：gh-1→…→gh-6，且 gh-1 前置为 yd-3', () => {
-  assert.deepEqual(guihua[0].prev, ['yd-3']);
+test('③ 严格串联：gh-1→…→gh-6，且 gh-1 无前置（1A 方案）', () => {
+  // 2026-10-08 修正：原为 gh-1 前置 yd-3（即第15项要等第10项），与业务口径相反。
+  // 现改为 gh-1 无前置、可先行启动；反过来由 yd-3（第10项）依赖 gh-1。
+  assert.deepEqual(guihua[0].prev, []);
   for (let i = 1; i < guihua.length; i++) {
     assert.deepEqual(guihua[i].prev, [guihua[i - 1].id], guihua[i].id + ' 必须紧跟 ' + guihua[i - 1].id);
   }
+});
+
+test('③ gh-1 notes 已改为说明「本项是起点、反向卡住第10/2/3项」', () => {
+  const n = guihua[0].notes;
+  assert.ok(n.includes('多规合一'), 'notes 应点明本项即多规合一初审');
+  assert.ok(n.includes('无前置手续'), 'notes 应说明本项无前置');
+  assert.ok(n.includes('yd-3') && n.includes('lx-2'), 'notes 应列出被本项卡住的手续');
 });
 
 test('③ 顺序要点：勘察图纸备案（gh-4）在规证之后、消防审图之前', () => {

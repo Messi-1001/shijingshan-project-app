@@ -29,7 +29,9 @@ test('④ 四轴 tenderType：设计/勘察/监理/施工，供时间轴使用',
     assert.equal(zhaobiao[i].parallel, true);
     assert.deepEqual(zhaobiao[i].prev, ['zb-1']);
   });
-  assert.deepEqual(zhaobiao[4].prev, ['zb-1', 'gh-6']);
+  // 施工招标（zb-5）：2026-10-08 起前置只保留第7项初步设计概算审批（lx-7），
+  // 原有的 zb-1 招标方案审查、gh-6 施工图备案 均不再作为前置条件。
+  assert.deepEqual(zhaobiao[4].prev, ['lx-7']);
   assert.equal(zhaobiao[4].parallel, false);
 });
 

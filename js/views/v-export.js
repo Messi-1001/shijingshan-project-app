@@ -122,7 +122,7 @@
           return { ok: true, format: 'html' };
         }
         case 'flow-image': {
-          var layout = F.flowLayout(ctx.index, {});
+          var layout = F.flowLayout(ctx.index, { sectionLabels: ctx.sectionLabels });
           var svg = F.buildFlowSvg(layout, { statusOf: ctx.statusOf || function () { return 'idle'; } });
           return await F.exportFlowImage(svg, pn + '-手续流程图');
         }
@@ -145,6 +145,27 @@
     }
   }
 
+  // 运行时手续索引解析（与 v-platform / v-reasons / v-schedule 同口径）。
+  // boot 时 main.js 的 registerProcedures 把 buildIndex 的产物挂在 S.app.procedures；
+  // procedures-index.js 自己挂的是 S.data.index（那是「模块」，不是索引实例）。
+  // 历史缺陷：本文件原先读的是一个从未被赋值的 data 键（名字是 procedures 前缀 + Index
+  // 后缀，非 proceduresIndex），导致 index 恒为 undefined：流程图导出成 0 节点白纸，
+  // Word/CSV/PPT 全被兜底成「导出失败」。与用户是否填写信息无关。
+  function resolveIndex() {
+    var S = (typeof window !== 'undefined' && window.SJSQ) || null;
+    if (!S) return { list: [], byId: {}, bySection: {} };
+    var index = (S.app && S.app.procedures)
+      || (S.data && S.data.index && typeof S.data.index.getAll === 'function'
+        ? { list: S.data.index.getAll(), byId: {}, bySection: {} }
+        : null)
+      || { list: [], byId: {}, bySection: {} };
+    if (!index.list || !index.list.length) {
+      return { list: (S.data && S.data.index && typeof S.data.index.getAll === 'function')
+        ? S.data.index.getAll() : [], byId: index.byId || {}, bySection: index.bySection || {} };
+    }
+    return index;
+  }
+
   function render() {
     var ui = window.SJSQ.views.ui, h = window.SJSQ.core.dom.h;
     var store = window.SJSQ.app.store;   // 运行时实例，不是 SJSQ.core.store 模块
@@ -153,7 +174,7 @@
     // G21/G22：Store 是「表 + id」接口。单例设置一律从 meta 表按 id 取后读 .value；
     // checklist 取整表再聚成 Map。整个过程是异步的，所以 ctxOf 必须是 async。
     async function ctxOf() {
-      var index = window.SJSQ.data.proceduresIndex;
+      var index = resolveIndex();
 
       var rows = (await store.list('checklist')) || [];
       var checklist = {};
@@ -188,6 +209,7 @@
         tenderInput: tenderInput,
         exporters: window.SJSQ.logic.exporters, pptx: window.SJSQ.logic.pptx, flow: window.SJSQ.logic.flow,
         backup: window.SJSQ.logic.backup, store: store,
+        sectionLabels: (window.SJSQ.data.schema && window.SJSQ.data.schema.SECTIONS) || null,
         statusOf: function (id) { return (checklist[id] && checklist[id].status) || 'idle'; },
       };
     }
@@ -224,5 +246,5 @@
     return wrap;
   }
 
-  return { EXPORTS: EXPORTS, esc: esc, buildReportHtml: buildReportHtml, downloadBinary: downloadBinary, downloadText: downloadText, runExport: runExport, render: render };
+  return { EXPORTS: EXPORTS, esc: esc, buildReportHtml: buildReportHtml, downloadBinary: downloadBinary, downloadText: downloadText, resolveIndex: resolveIndex, runExport: runExport, render: render };
 });

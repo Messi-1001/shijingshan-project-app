@@ -12,16 +12,21 @@ assert.equal(proceduresIndex.list.length, 40, '全量登记应为 40 条');
 
 const T = 200; // ms，宽松阈值
 
-test('全量搜索（40 手续 + 34 模板 + 27 原因 + 2 平台）平均 < 200ms', () => {
+test('全量搜索（40 手续 + 34 模板 + 29 原因 + 2 平台）平均 < 200ms', () => {
   const search = require('../js/logic/search.js');
+  const rr = require('../js/data/reject-reasons.js');
+  const nReasons = Array.isArray(rr.REASONS) ? rr.REASONS.length
+    : (Array.isArray(rr) ? rr.length : Object.keys(rr).length);
   const data = {
     proceduresIndex: proceduresIndex,
     templatesIndex: { list: require('../js/data/templates-index.js').RAW },
-    rejectReasons: require('../js/data/reject-reasons.js'),
+    rejectReasons: rr,
     platforms: require('../js/data/platforms.js'),
   };
   const idx = search.buildSearchIndex(data);
-  assert.equal(idx.length, 40 + 34 + 27 + 2, '检索项总数应为 103');
+  const expect = 40 + 34 + nReasons + 2;
+  assert.equal(idx.length, expect, '检索项总数应为 ' + expect + '（按实际数据量计算，避免条目增减后断言失效）');
+  assert.ok(nReasons >= 29, '驳回理由不应少于 29 条');
   const t0 = Date.now();
   const N = 20;
   for (let i = 0; i < N; i++) search.search('施工', { index: idx });

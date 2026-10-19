@@ -28,8 +28,12 @@ test('buildRows 每行带"为什么你要办这一项"的依据', () => {
 
 test('buildRows 标出被前置阻塞的项', () => {
   const rows = vc.buildRows(LIST, {}, c.FIXED_VALUES);
+  // lx-2 只被 lx-1 挡住（2026-10-08 更正：第2项与第15项无关）
   assert.deepEqual(rows.find((x) => x.id === 'lx-2').blocked, ['lx-1']);
+  // lx-3 被 lx-2 与 gh-1 挡住
+  assert.ok(rows.find((x) => x.id === 'lx-3').blocked.includes('gh-1'));
   assert.deepEqual(rows.find((x) => x.id === 'lx-1').blocked, []);
+  assert.deepEqual(rows.find((x) => x.id === 'gh-1').blocked, [], 'gh-1 无前置，不应被阻塞');
 });
 
 test('buildRows 带出状态', () => {

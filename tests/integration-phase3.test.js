@@ -47,8 +47,18 @@ test('前置联动：办完 1 才能办 2（① 立项 A 段）', () => {
   const doneOne = { 'p-1::lx-1': { id: 'p-1::lx-1', projectId: 'p-1', procedureId: 'lx-1', status: 'done' } };
   const rows = vc.buildRows(LIST, doneOne, cond.FIXED_VALUES, null, 'p-1');
   assert.deepEqual(rows.find((r) => r.id === 'lx-1').blocked, []);
+  // 办完 lx-1 后 lx-2 即解锁（2026-10-08 更正：第2项与第15项无关）
   assert.deepEqual(rows.find((r) => r.id === 'lx-2').blocked, []);
-  assert.deepEqual(rows.find((r) => r.id === 'lx-3').blocked, ['lx-2']);
+  // lx-3 仍须等 lx-2 与 gh-1
+  assert.ok(rows.find((r) => r.id === 'lx-3').blocked.includes('lx-2'));
+  assert.ok(rows.find((r) => r.id === 'lx-3').blocked.includes('gh-1'));
+  // gh-1 办结后，lx-3 不再被它阻塞
+  const both = {
+    'p-1::lx-1': { id: 'p-1::lx-1', projectId: 'p-1', procedureId: 'lx-1', status: 'done' },
+    'p-1::gh-1': { id: 'p-1::gh-1', projectId: 'p-1', procedureId: 'gh-1', status: 'done' },
+  };
+  const rows2 = vc.buildRows(LIST, both, cond.FIXED_VALUES, null, 'p-1');
+  assert.equal(rows2.find((r) => r.id === 'lx-3').blocked.indexOf('gh-1'), -1);
 });
 
 test('状态值只允许 idle/doing/done，脏数据归 idle', () => {
